@@ -13,6 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initGenerateButton();
     initModal();
     checkHealth();
+
+    const pirateVideo = document.getElementById('pirateVideo');
+    if (pirateVideo) {
+        pirateVideo.addEventListener('mouseenter', () => {
+            pirateVideo.playbackRate = 4.0;
+            pirateVideo.play().catch(() => {});
+        });
+
+        pirateVideo.addEventListener('mouseleave', () => {
+            pirateVideo.pause();
+            pirateVideo.currentTime = 0;
+        });
+    }
 });
 
 // === Обработка формы ===
@@ -264,3 +277,23 @@ async function checkHealth() {
         showStatus('⚠️ Бэкенд не отвечает (запустите App.java)', 'info');
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initForm();
+    initGenerateButton();
+    initModal();
+    checkHealth();
+
+    // === Видео в шапке ===
+    const pirateVideo = document.getElementById('pirateVideo');
+    if (pirateVideo) {
+        pirateVideo.addEventListener('mouseenter', () => {
+            pirateVideo.playbackRate = 8.0;
+            pirateVideo.play().catch(() => {});
+        });
+
+        pirateVideo.addEventListener('mouseleave', () => {
+            pirateVideo.playbackRate = 1.0;
+        });
+    }
+});

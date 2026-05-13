@@ -16,7 +16,7 @@ CODE_EXTENSIONS = {
     '.kt', '.kts', '.gradle', '.gradle.kts', '.http',
     'build.gradle', 'settings.gradle', 'gradle.properties',
     # React / TypeScript / Vite / Redux
-    '.ts', '.tsx', '.js', '.jsx',
+    '.ts', '.tsx', '.js', '.jsx', '.html',
     '.json', '.yaml', '.yml', '.toml',
     '.md', '.java', '.fxml',
     '.env', '.env.local', '.css',

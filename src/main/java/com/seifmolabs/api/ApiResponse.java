@@ -6,20 +6,20 @@ import java.awt.*;
 import java.util.Map;
 
 public class ApiResponse {
-    public List<ApproxResult> results;
+    public List results;
     public Map<String, Object> chartData;
     public String error;
 
     public ApiResponse() {}
 
-    public ApiResponse(List<ApproxResult> results, Map<String, Object> chartData, String error) {
+    public ApiResponse(List results, Map<String, Object> chartData, String error) {
         this.results = results;
         this.chartData = chartData;
         this.error = error;
     }
 
     // Статические фабрики для удобства использования в ApproxApi
-    public static ApiResponse ok(List<ApproxResult> results, Map<String, Object> chartData) {
+    public static ApiResponse ok(List results, Map<String, Object> chartData) {
         return new ApiResponse(results, chartData, null);
     }
 

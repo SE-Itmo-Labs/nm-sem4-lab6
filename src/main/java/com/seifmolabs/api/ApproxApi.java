@@ -1,47 +1,141 @@
 package com.seifmolabs.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seifmolabs.exceptions.ValidationException;
+import com.seifmolabs.objects.ApproxResult;
 import com.seifmolabs.objects.Point2D;
 import com.seifmolabs.service.ApproximationService;
 import io.javalin.Javalin;
 
 import com.seifmolabs.api.ApiResponse;
 
-import java.awt.*;
+import java.util.*;
 
 public class ApproxApi {
-
     private static final ObjectMapper json = new ObjectMapper();
     private static final ApproximationService service = new ApproximationService();
 
     public static void register(Javalin app) {
+        // 1. CORS
+        app.before(ctx -> {
+            ctx.header("Access-Control-Allow-Origin", "*");
+            ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            ctx.header("Access-Control-Allow-Headers", "Content-Type");
+        });
+        app.options("/*", ctx -> ctx.status(200));
 
-        // POST /api/calculate — основной расчёт
-        app.post("/api/calculate", ctx -> {
-            try {
-                var input = ctx.bodyAsClass(InputData.class);
-                if (input.points == null || input.points.length < 8) {
-                    ctx.status(400).json(ApiResponse.error("Требуется от 8 точек"));
-                    return;
-                }
-
-                // Преобразуем массив в List, как ожидает сервис
-                var points = java.util.Arrays.asList(input.points);
-                var results = service.calculateAll(points);
-
-                // Формируем ответ согласно твоему ApiResponse.java
-                ctx.json(ApiResponse.ok((List) results, java.util.Map.of()));
-            } catch (Exception e) {
-                ctx.status(400).json(ApiResponse.error(e.getMessage()));
-            }
+        // 2. Обработка ошибок
+        app.exception(ValidationException.class, (e, ctx) -> {
+            ctx.status(400).json(ApiResponse.error(e.getMessage()));
+        });
+        app.exception(Exception.class, (e, ctx) -> {
+            e.printStackTrace();
+            ctx.status(500).json(ApiResponse.error("Внутренняя ошибка сервера: " + e.getMessage()));
         });
 
-        // GET /api/health — проверка сервера
-        app.get("/api/health", ctx -> ctx.json("{\"status\":\"ok\"}"));
+        // 3. POST /api/calculate
+        app.post("/api/calculate", ctx -> {
+            CalculateRequest req = ctx.bodyAsClass(CalculateRequest.class);
+
+            if (req.points == null) {
+                throw new ValidationException("Поле 'points' обязательно");
+            }
+
+            List<Point2D> points = new ArrayList<>();
+            Set<Double> uniqueX = new HashSet<>();
+
+            for (double[] pair : req.points) {
+                if (pair == null || pair.length != 2) {
+                    throw new ValidationException("Каждая точка должна быть массивом из двух чисел [x, y]");
+                }
+                double x = pair[0];
+                double y = pair[1];
+                if (Double.isNaN(x) || Double.isInfinite(x) || Double.isNaN(y) || Double.isInfinite(y)) {
+                    throw new ValidationException("Координаты должны быть корректными числами");
+                }
+                if (!uniqueX.add(x)) {
+                    throw new ValidationException("Значения X должны быть уникальными");
+                }
+                points.add(new Point2D(x, y));
+            }
+
+            if (points.size() < 8 || points.size() > 12) {
+                throw new ValidationException("Требуется от 8 до 12 точек. Введено: " + points.size());
+            }
+
+            // Запуск аппроксимации и сортировка по RMS
+            List<ApproxResult> results = service.calculateAll(points);
+            results.sort(Comparator.comparingDouble(r -> r.rms));
+
+            // Генерация plotData: 120 точек на [minX-0.5, maxX+0.5]
+            double minX = points.stream().mapToDouble(p -> p.x).min().orElse(0.0);
+            double maxX = points.stream().mapToDouble(p -> p.x).max().orElse(0.0);
+            double plotStart = minX - 0.5;
+            double plotEnd = maxX + 0.5;
+            int steps = 120;
+            double step = (plotEnd - plotStart) / steps;
+
+            for (ApproxResult res : results) {
+                List<Point2D> plotPoints = new ArrayList<>();
+                for (double x = plotStart; x <= plotEnd; x += step) {
+                    double y = evaluateFunction(res, x);
+                    if (Double.isFinite(y)) {
+                        plotPoints.add(new Point2D(x, y));
+                    }
+                }
+                res.plotData = plotPoints;
+            }
+
+            ctx.json(ApiResponse.ok(results, Map.of()));
+        });
+
+        // 4. POST /api/generate-random
+        app.post("/api/generate-random", ctx -> {
+            GenerateRequest req = ctx.bodyAsClass(GenerateRequest.class);
+            int count = req.count != null ? req.count : 10;
+
+            if (count < 8 || count > 12) {
+                throw new ValidationException("Количество точек должно быть от 8 до 12");
+            }
+
+            Random rand = new Random();
+            double slope = 0.5 + rand.nextDouble() * 1.5;
+            double intercept = 10.0 + rand.nextDouble() * 40.0;
+            double currentX = 1.0;
+            List<Point2D> points = new ArrayList<>();
+
+            for (int i = 0; i < count; i++) {
+                currentX += 0.8 + rand.nextDouble() * 1.2;
+                double noise = (rand.nextDouble() - 0.5) * 6.0;
+                double y = slope * currentX + intercept + noise;
+                points.add(new Point2D(
+                        Math.round(currentX * 100.0) / 100.0,
+                        Math.round(y * 100.0) / 100.0
+                ));
+            }
+
+            ctx.json(points);
+        });
     }
 
-    // Вспомогательные DTO
-    public static class InputData {
-        public Point2D[] points;
+    private static double evaluateFunction(ApproxResult res, double x) {
+        Map<String, Double> p = res.params;
+        return switch (res.name) {
+            case "Линейная" -> p.get("a") * x + p.get("b");
+            case "Полином 2-й степени" -> p.get("a2") * x * x + p.get("a1") * x + p.get("a0");
+            case "Полином 3-й степени" -> p.get("a3") * Math.pow(x, 3) + p.get("a2") * x * x + p.get("a1") * x + p.get("a0");
+            case "Экспоненциальная" -> p.get("a") * Math.exp(p.get("b") * x);
+            case "Логарифмическая" -> (x > 0) ? p.get("a") * Math.log(x) + p.get("b") : Double.NaN;
+            case "Степенная" -> (x > 0) ? p.get("a") * Math.pow(x, p.get("b")) : Double.NaN;
+            default -> 0.0;
+        };
+    }
+
+    public static class CalculateRequest {
+        public double[][] points;
+    }
+
+    public static class GenerateRequest {
+        public Integer count;
     }
 }

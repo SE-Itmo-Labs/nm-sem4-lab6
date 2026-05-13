@@ -2,8 +2,7 @@ package com.seifmolabs.api;
 
 import com.seifmolabs.objects.ApproxResult;
 
-import java.awt.*;
-import java.util.Map;
+import java.util.*;
 
 public class ApiResponse {
     public List results;

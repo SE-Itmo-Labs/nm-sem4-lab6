@@ -5,6 +5,10 @@ import com.seifmolabs.objects.Point2D;
 import com.seifmolabs.service.ApproximationService;
 import io.javalin.Javalin;
 
+import com.seifmolabs.api.ApiResponse;
+
+import java.awt.*;
+
 public class ApproxApi {
 
     private static final ObjectMapper json = new ObjectMapper();
@@ -16,12 +20,19 @@ public class ApproxApi {
         app.post("/api/calculate", ctx -> {
             try {
                 var input = ctx.bodyAsClass(InputData.class);
-//                var points = input.points.toArray(new Point2D[0]);
-                var points = new Point2D[0];
+                if (input.points == null || input.points.length < 8) {
+                    ctx.status(400).json(ApiResponse.error("Требуется от 8 точек"));
+                    return;
+                }
+
+                // Преобразуем массив в List, как ожидает сервис
+                var points = java.util.Arrays.asList(input.points);
                 var results = service.calculateAll(points);
-                ctx.json(new ApiResponse(true, "OK", results));
+
+                // Формируем ответ согласно твоему ApiResponse.java
+                ctx.json(ApiResponse.ok((List) results, java.util.Map.of()));
             } catch (Exception e) {
-                ctx.status(400).json(new ApiResponse(false, e.getMessage(), null));
+                ctx.status(400).json(ApiResponse.error(e.getMessage()));
             }
         });
 
@@ -32,17 +43,5 @@ public class ApproxApi {
     // Вспомогательные DTO
     public static class InputData {
         public Point2D[] points;
-    }
-
-    public static class ApiResponse {
-        public boolean success;
-        public String message;
-        public Object data;
-
-        public ApiResponse(boolean success, String message, Object data) {
-            this.success = success;
-            this.message = message;
-            this.data = data;
-        }
     }
 }

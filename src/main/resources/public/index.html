@@ -3,68 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Javalin + График</title>
-    <!-- Подключаем Chart.js через CDN -->
+    <title>ЛР №4 | ВычМат | Аппроксимация МНК</title>
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: system-ui, sans-serif; text-align: center; margin-top: 40px; background: #f5f7fa; }
-        h1 { color: #333; }
-        button {
-            padding: 10px 20px; font-size: 16px; cursor: pointer;
-            background: #4CAF50; color: white; border: none; border-radius: 4px;
-        }
-        button:hover { background: #45a049; }
-        .chart-container { max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    </style>
 </head>
 <body>
-<h1>График координат</h1>
-<button id="loadBtn">Получить координаты (1, 1)</button>
+<div class="container">
+    <header class="header-flex">
+        <div class="header-text">
+            <h1>Лабораторная работа №4</h1>
+            <h3>Аппроксимация функции методом наименьших квадратов</h3>
+            <p>Выполнил: студент Р3215 <span id="studentName">[Ваша Фамилия]</span></p>
+        </div>
+        <div class="header-img">
+            <video id="pirateVideo" src="img/pirate.mp4" autoplay loop muted playsinline width="200"></video>
+        </div>
+    </header>
 
-<div class="chart-container">
-    <canvas id="myChart"></canvas>
+    <div class="marquee-container">
+        <marquee scrollamount="5">
+            *** ДОБРО ПОЖАЛОВАТЬ НА СТРАНИЦУ ЛАБОРАТОРНОЙ РАБОТЫ №4 ***
+        </marquee>
+    </div>
+
+    <div class="main-layout">
+        <!-- Левая панель: ввод данных -->
+        <aside class="input-panel">
+            <h2>Входные данные</h2>
+            <form id="dataForm" class="retro-form">
+                <div class="form-group">
+                    <label><b>Точки (8-12):</b></label>
+                    <textarea id="pointsInput" class="retro-input" rows="10" placeholder="x y&#10;0.0 0.0&#10;0.4 2.962&#10;..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><b>Интервал:</b></label>
+                    <div class="input-row">
+                        <input type="text" id="intervalMin" class="retro-input" placeholder="min" value="0">
+                        <input type="text" id="intervalMax" class="retro-input" placeholder="max" value="4">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
+                    <button type="button" class="retro-btn retro-btn-secondary" id="generateBtn">СГЕНЕРИРОВАТЬ</button>
+                </div>
+                <div id="formStatus" class="status-message"></div>
+            </form>
+
+            <div class="graph-controls">
+                <label><b>Отображать:</b></label>
+                <div id="functionCheckboxes"></div>
+            </div>
+        </aside>
+
+        <!-- Центр: график -->
+        <main class="graph-panel">
+            <h2>График аппроксимации</h2>
+            <div class="graph-box">
+                <canvas id="approxChart"></canvas>
+            </div>
+            <p id="graphCaption">Введите данные и нажмите "Рассчитать"</p>
+
+            <div id="bestResultPanel" class="results-panel" style="display: none;">
+                <h3>✅ Наилучшее приближение</h3>
+                <div class="results-grid">
+                    <div class="result-item">
+                        <span class="result-label">Функция:</span>
+                        <span class="result-value" id="bestFormula">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">RMS:</span>
+                        <span class="result-value" id="bestRms">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">R²:</span>
+                        <span class="result-value" id="bestR2">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Оценка:</span>
+                        <span class="result-value" id="bestMessage">-</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Низ: таблица результатов -->
+    <section class="results-section">
+        <h2>Результаты аппроксимации</h2>
+        <table class="data-table" id="resultsTable">
+            <thead>
+            <tr>
+                <th>Функция</th>
+                <th>Формула</th>
+                <th>RMS</th>
+                <th>R²</th>
+                <th>Оценка</th>
+                <th>Детали</th>
+            </tr>
+            </thead>
+            <tbody id="resultsBody">
+            <tr><td colspan="6" style="text-align:center">Нет данных</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Модальное окно для деталей -->
+    <div id="detailsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3 id="modalTitle">Детали</h3>
+            <table class="data-table" id="modalTable">
+                <thead>
+                <tr><th>x</th><th>y</th><th>φ(x)</th><th>ε</th></tr>
+                </thead>
+                <tbody id="modalBody"></tbody>
+            </table>
+            <button class="retro-btn retro-btn-secondary" onclick="downloadModalData()">Скачать данные</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Кафедра Вычислительной Математики</p>
+        <div class="footer-badges">
+            <img src="https://88x31.nl/gifs/devOnMintGreen.png" alt="">
+            <img src="https://88x31.nl/gifs/firefoxnow.gif" alt="">
+            <img src="https://88x31.nl/gifs/neo_now88.gif" alt="">
+        </div>
+    </footer>
 </div>
 
-<script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-
-    // Инициализация точечного графика
-    let chart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Координаты (x, y)',
-                data: [],
-                backgroundColor: 'rgba(75, 192, 192, 1)',
-                pointRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: 'Ось X' }, min: 0, max: 2 },
-                y: { title: { display: true, text: 'Ось Y' }, min: 0, max: 2 }
-            }
-        }
-    });
-
-    // Обработчик кнопки
-    document.getElementById('loadBtn').addEventListener('click', async () => {
-        try {
-            const response = await fetch('/api/coordinates');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const data = await response.json();
-            console.log('Получены координаты:', data);
-
-            // Добавляем точку на график
-            chart.data.datasets[0].data.push({ x: data.x, y: data.y });
-            chart.update();
-        } catch (error) {
-            console.error('Ошибка при запросе:', error);
-            alert('Не удалось загрузить координаты. Проверьте консоль.');
-        }
-    });
-</script>
+<script src="js/app.js"></script>
 </body>
 </html>

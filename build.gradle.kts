@@ -27,5 +27,5 @@ tasks.test {
 }
 
 application {
-    mainClass.set("com.seifmolabs.Main")
+    mainClass.set("com.seifmolabs.App")
 }

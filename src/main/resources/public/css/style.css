@@ -1,0 +1,186 @@
+/* === Ретро-переменные === */
+:root {
+    --retro-bg: #c0c0c0;
+    --retro-fg: #000000;
+    --retro-primary: #000080;
+    --retro-secondary: #008080;
+    --retro-accent: #ffff00;
+    --retro-border-light: #ffffff;
+    --retro-border-dark: #808080;
+    --retro-font: "Times New Roman", Times, serif;
+    --retro-mono: "Courier New", monospace;
+}
+
+/* === Базовые стили === */
+body {
+    background-color: var(--retro-bg);
+    background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 20px 20px;
+    font-family: var(--retro-font);
+    margin: 0;
+    padding: 10px;
+    color: var(--retro-fg);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 5px ridge var(--retro-border-dark);
+    padding: 15px;
+}
+
+/* === Шапка === */
+.header-flex {
+    display: flex;
+    text-align: center;
+    border-bottom: 3px double var(--retro-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.header-text, .header-img { width: 50%; }
+h1 { color: var(--retro-primary); font-size: 24px; margin: 5px; text-shadow: 2px 2px var(--retro-accent); }
+h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; padding: 5px; border: 2px outset var(--retro-border-dark); }
+
+/* === Marquee === */
+.marquee-container {
+    background-color: #000000; color: #00ff00; font-family: var(--retro-mono);
+    padding: 5px; margin-bottom: 10px; border: 2px inset var(--retro-border-dark);
+}
+
+/* === Основная разметка === */
+.main-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* === Панель ввода === */
+.input-panel {
+    background-color: var(--retro-bg);
+    border: 3px outset var(--retro-border-dark);
+    padding: 15px;
+}
+
+.retro-form {
+    background-color: var(--retro-bg);
+    border: 3px outset var(--retro-border-dark);
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: var(--retro-primary); font-weight: bold; font-size: 14px; }
+
+.input-row { display: flex; gap: 10px; }
+.input-row .retro-input { flex: 1; }
+
+.retro-input, .retro-select, textarea.retro-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-family: var(--retro-mono);
+    font-size: 14px;
+    background-color: #ffffff;
+    border: 2px inset var(--retro-border-dark);
+    color: #000000;
+    box-sizing: border-box;
+}
+.retro-input:focus, textarea.retro-input:focus {
+    outline: none; border: 2px outset var(--retro-primary); background-color: #ffffcc;
+}
+
+/* === Кнопки === */
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.retro-btn {
+    flex: 1; padding: 10px 15px; font-family: var(--retro-font); font-size: 14px; font-weight: bold;
+    border: 3px outset var(--retro-border-dark); cursor: pointer; transition: all 0.1s;
+}
+.retro-btn:active { border-style: inset; transform: translate(1px, 1px); }
+.retro-btn-primary { background: linear-gradient(to bottom, #4a90e2, #2c5aa0); color: #ffffff; }
+.retro-btn-primary:hover { background: linear-gradient(to bottom, #5aa0f2, #3c6ab0); }
+.retro-btn-secondary { background: linear-gradient(to bottom, #e0e0e0, #a0a0a0); color: #000000; }
+.retro-btn-secondary:hover { background: linear-gradient(to bottom, #f0f0f0, #b0b0b0); }
+
+/* === Статусы === */
+.status-message {
+    margin-top: 15px; padding: 10px; border: 2px inset var(--retro-border-dark); font-size: 13px; display: none;
+}
+.status-message.show { display: block; }
+.status-message.success { background-color: #ccffcc; border-color: #00aa00; color: #006600; }
+.status-message.error { background-color: #ffcccc; border-color: #aa0000; color: #660000; }
+
+/* === График === */
+.graph-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.graph-box {
+    width: 100%;
+    height: 500px;
+    border: 4px inset var(--retro-primary);
+    background-color: #ffffff;
+    margin: 10px 0;
+    position: relative;
+    overflow: hidden;
+}
+.graph-box canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* === Таблица результатов === */
+.results-section { margin-top: 20px; }
+.data-table {
+    width: 100%; border-collapse: collapse; border: 3px outset var(--retro-border-dark); margin-bottom: 20px;
+}
+.data-table th, .data-table td { border: 1px inset var(--retro-border-dark); padding: 5px; text-align: center; }
+.data-table th { background-color: var(--retro-bg); color: #000000; }
+
+/* === Панель результатов === */
+.results-panel {
+    margin-top: 20px; padding: 15px; background-color: #f5f5f5; border: 3px ridge var(--retro-border-dark);
+}
+.results-panel h3 { margin-top: 0; color: var(--retro-primary); font-size: 16px; border-bottom: 2px solid var(--retro-primary); padding-bottom: 5px; }
+.results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.result-item { display: flex; flex-direction: column; padding: 8px; background-color: #ffffff; border: 2px inset var(--retro-border-dark); }
+.result-label { font-size: 12px; color: #666666; margin-bottom: 3px; }
+.result-value { font-family: var(--retro-mono); font-size: 16px; font-weight: bold; color: var(--retro-primary); }
+
+/* === Модальное окно === */
+.modal {
+    position: fixed; z-index: 1000; left: 0; top: 0;
+    width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
+}
+.modal-content {
+    background-color: #ffffff; margin: 10% auto; padding: 20px;
+    border: 4px ridge var(--retro-border-dark); width: 80%; max-width: 700px;
+}
+.modal-close {
+    float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--retro-primary);
+}
+.modal-close:hover { color: #ff0000; }
+
+/* === Чекбоксы функций === */
+.graph-controls label { display: block; margin: 5px 0; font-size: 13px; }
+.graph-controls input[type="checkbox"] { margin-right: 5px; }
+
+/* === Футер === */
+footer { margin-top: 30px; text-align: center; font-size: 12px; border-top: 2px solid #000000; padding-top: 10px; }
+.footer-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 10px; }
+
+/* === Адаптив === */
+@media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .input-panel { order: 2; }
+    .graph-panel { order: 1; }
+    .results-grid { grid-template-columns: 1fr; }
+    .header-flex { flex-direction: column; }
+    .header-text, .header-img { width: 100%; }
+}

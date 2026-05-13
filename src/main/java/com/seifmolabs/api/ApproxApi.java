@@ -16,6 +16,13 @@ public class ApproxApi {
     private static final ApproximationService service = new ApproximationService();
 
     public static void register(Javalin app) {
+
+        app.exception(Exception.class, (e, ctx) -> {
+            e.printStackTrace();
+            String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            ctx.status(500).json(ApiResponse.error("Внутренняя ошибка сервера: " + msg));
+        });
+
         // 1. CORS
         app.before(ctx -> {
             ctx.header("Access-Control-Allow-Origin", "*");
@@ -64,7 +71,7 @@ public class ApproxApi {
             }
 
             // Запуск аппроксимации и сортировка по RMS
-            List<ApproxResult> results = service.calculateAll(points);
+            List<ApproxResult> results = new ArrayList<>(service.calculateAll(points));
             results.sort(Comparator.comparingDouble(r -> r.rms));
 
             // Генерация plotData: 120 точек на [minX-0.5, maxX+0.5]

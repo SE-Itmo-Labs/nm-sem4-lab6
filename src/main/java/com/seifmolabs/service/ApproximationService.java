@@ -122,7 +122,7 @@ public class ApproximationService {
         results.add(powApprox(points));
 
         // Убираем null (возникают при нарушении области определения y>0, x>0)
-        return results.stream().filter(Objects::nonNull).toList();
+        return results.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public ApproxResult getBest(ApproxResult[] results) {
@@ -161,13 +161,11 @@ public class ApproximationService {
         res.rms = m.rms;
         res.r2 = m.r2;
         res.r2Message = MetricsCalculator.getR2Message(m.r2);
-        res.pearson = pearson != null ? pearson : 0.0;
+
+        res.pearson = pearson;
+
         res.params = params;
         res.pointsData = m.pointsData;
-        // Сохраняем функцию для построения графика (если потребуется в view)
-        // В текущей структуре поля публичные, поэтому функцию можно сохранить в доп. поле или мапу,
-        // но для совместимости оставим её в замыкании сервиса или добавим поле в ApproxResult при необходимости.
-        // Для этапа 3 достаточно возврата DTO.
         return res;
     }
 }

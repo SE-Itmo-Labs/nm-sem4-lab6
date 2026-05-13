@@ -2,138 +2,125 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ЛР №4 | ВычМат | Аппроксимация МНК</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Лабораторная 4. Аппроксимация</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Обязательно подключаем Chart.js для отрисовки графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<div class="container">
-    <header class="header-flex">
-        <div class="header-text">
-            <h1>Лабораторная работа №4</h1>
-            <h3>Аппроксимация функции методом наименьших квадратов</h3>
-            <p>Выполнил: студент Р3215 <span id="studentName">[Ваша Фамилия]</span></p>
+    <div class="container">
+        <div class="header-flex">
+            <div class="header-text" style="width: 100%;">
+                <h1>Аппроксимация функций (МНК)</h1>
+                <h2>Лабораторная работа №4 | Вариант 2</h2>
+            </div>
         </div>
-        <div class="header-img">
-            <video id="pirateVideo" src="img/pirate.mp4" autoplay loop muted playsinline width="200"></video>
+
+        <div class="marquee-container">
+            <marquee scrollamount="5">*** ДОБРО ПОЖАЛОВАТЬ В ПРОГРАММУ ВЫЧИСЛЕНИЙ ***</marquee>
         </div>
-    </header>
 
-    <div class="marquee-container">
-        <marquee scrollamount="5">
-            *** ДОБРО ПОЖАЛОВАТЬ НА СТРАНИЦУ ЛАБОРАТОРНОЙ РАБОТЫ №4 ***
-        </marquee>
+        <div class="main-layout">
+            <!-- Левая панель: Ввод данных -->
+            <div class="input-panel">
+                <div class="retro-form">
+                    <h3 style="margin-top:0; color:var(--retro-primary);">Входные данные</h3>
+                    <form id="dataForm">
+                        <div class="form-group">
+                            <label for="pointsInput">Точки (8-12):</label>
+                            <!-- Тестовые данные по умолчанию -->
+                            <textarea id="pointsInput" class="retro-input" rows="12" placeholder="X Y&#10;0.0 0.0&#10;0.4 2.962..."></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
+                            <button type="button" id="generateBtn" class="retro-btn retro-btn-secondary">СГЕНЕРИРОВАТЬ</button>
+                        </div>
+                        <div id="formStatus" class="status-message"></div>
+                    </form>
+                </div>
+
+                <div class="retro-form">
+                    <h3 style="margin-top:0; color:var(--retro-primary);">Отображать:</h3>
+                    <div id="chartCheckboxes" class="graph-controls">
+                        <span style="font-size: 13px; color: #666;">Здесь появятся функции после расчета...</span>
+                    </div>
+                </div>
+
+                <div id="bestResultPanel" class="results-panel" style="display:none;">
+                    <h3>Наилучшее приближение</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <span class="result-label">Формула</span>
+                            <span class="result-value" id="bestFormula" style="font-size: 13px;"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">СКО (RMS)</span>
+                            <span class="result-value" id="bestRms"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">R²</span>
+                            <span class="result-value" id="bestR2"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Вывод</span>
+                            <span class="result-value" id="bestMessage" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая панель: График и Таблица -->
+            <div class="graph-panel">
+                <h2 style="margin-top: 0;">График аппроксимации</h2>
+                <div class="graph-box">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+
+                <div class="results-section">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Функция</th>
+                                <th>Формула</th>
+                                <th>СКО</th>
+                                <th>R²</th>
+                                <th>Вывод</th>
+                                <th>Пирсон</th>
+                                <th>Детали</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr>
+                                <td colspan="7">Введите данные и нажмите "Рассчитать"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="main-layout">
-        <!-- Левая панель: ввод данных -->
-        <aside class="input-panel">
-            <h2>Входные данные</h2>
-            <form id="dataForm" class="retro-form">
-                <div class="form-group">
-                    <label><b>Точки (8-12):</b></label>
-                    <textarea id="pointsInput" class="retro-input" rows="10" placeholder="x y&#10;0.0 0.0&#10;0.4 2.962&#10;..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><b>Интервал:</b></label>
-                    <div class="input-row">
-                        <input type="text" id="intervalMin" class="retro-input" placeholder="min" value="0">
-                        <input type="text" id="intervalMax" class="retro-input" placeholder="max" value="4">
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
-                    <button type="button" class="retro-btn retro-btn-secondary" id="generateBtn">СГЕНЕРИРОВАТЬ</button>
-                </div>
-                <div id="formStatus" class="status-message"></div>
-            </form>
-
-            <div class="graph-controls">
-                <label><b>Отображать:</b></label>
-                <div id="functionCheckboxes"></div>
-            </div>
-        </aside>
-
-        <!-- Центр: график -->
-        <main class="graph-panel">
-            <h2>График аппроксимации</h2>
-            <div class="graph-box">
-                <canvas id="approxChart"></canvas>
-            </div>
-            <p id="graphCaption">Введите данные и нажмите "Рассчитать"</p>
-
-            <div id="bestResultPanel" class="results-panel" style="display: none;">
-                <h3>✅ Наилучшее приближение</h3>
-                <div class="results-grid">
-                    <div class="result-item">
-                        <span class="result-label">Функция:</span>
-                        <span class="result-value" id="bestFormula">-</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">RMS:</span>
-                        <span class="result-value" id="bestRms">-</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">R²:</span>
-                        <span class="result-value" id="bestR2">-</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Оценка:</span>
-                        <span class="result-value" id="bestMessage">-</span>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Низ: таблица результатов -->
-    <section class="results-section">
-        <h2>Результаты аппроксимации</h2>
-        <table class="data-table" id="resultsTable">
-            <thead>
-            <tr>
-                <th>Функция</th>
-                <th>Формула</th>
-                <th>RMS</th>
-                <th>R²</th>
-                <th>Оценка</th>
-                <th>Детали</th>
-            </tr>
-            </thead>
-            <tbody id="resultsBody">
-            <tr><td colspan="6" style="text-align:center">Нет данных</td></tr>
-            </tbody>
-        </table>
-    </section>
 
     <!-- Модальное окно для деталей -->
-    <div id="detailsModal" class="modal" style="display: none;">
+    <div id="detailsModal" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3 id="modalTitle">Детали</h3>
-            <table class="data-table" id="modalTable">
-                <thead>
-                <tr><th>x</th><th>y</th><th>φ(x)</th><th>ε</th></tr>
-                </thead>
-                <tbody id="modalBody"></tbody>
-            </table>
-            <button class="retro-btn retro-btn-secondary" onclick="downloadModalData()">Скачать данные</button>
+            <h2 id="modalTitle" style="color:var(--retro-primary);">Детали</h2>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>Y</th>
+                            <th>Φ(x)</th>
+                            <th>ε</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <footer>
-        <p>© 2026 Кафедра Вычислительной Математики</p>
-        <div class="footer-badges">
-            <img src="https://88x31.nl/gifs/devOnMintGreen.png" alt="">
-            <img src="https://88x31.nl/gifs/firefoxnow.gif" alt="">
-            <img src="https://88x31.nl/gifs/neo_now88.gif" alt="">
-        </div>
-    </footer>
-</div>
-
-<script src="js/app.js"></script>
+    <script type="module" src="/js/app.js"></script>
 </body>
 </html>

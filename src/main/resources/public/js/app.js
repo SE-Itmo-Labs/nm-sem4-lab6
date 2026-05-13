@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGenerateButton();
     initModal();
     checkHealth();
+    initFileHandlers();
 
     const pirateVideo = document.getElementById('pirateVideo');
     if (pirateVideo) {
@@ -269,20 +270,10 @@ function showStatus(msg, type) {
     setTimeout(() => el.classList.remove('show'), 5000);
 }
 
-async function checkHealth() {
-    try {
-        await fetch(`${API_BASE}/health`);
-        console.log('✅ Бэкенд доступен');
-    } catch {
-        showStatus('⚠️ Бэкенд не отвечает (запустите App.java)', 'info');
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     initForm();
     initGenerateButton();
     initModal();
-    checkHealth();
 
     // === Видео в шапке ===
     const pirateVideo = document.getElementById('pirateVideo');
@@ -297,3 +288,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+
+
+
+function downloadReport() {
+    if (!allPoints.length || !allResults.length) {
+        alert('Сначала выполните расчет!');
+        return;
+    }
+
+    const now = new Date().toLocaleString('ru-RU');
+    let report = `========================================\n`;
+    report += `ОТЧЕТ ПО ЛАБОРАТОРНОЙ РАБОТЕ №4\n`;
+    report += `Аппроксимация функций методом наименьших квадратов\n`;
+    report += `Дата: ${now}\n`;
+    report += `========================================\n\n`;
+
+    // 1. Исходные данные
+    report += `[ИСХОДНЫЕ ДАННЫЕ]\n`;
+    report += `Количество точек: ${allPoints.length}\n`;
+    report += `${'X'.padEnd(12)} ${'Y'.padEnd(12)}\n`;
+    allPoints.forEach(p => {
+        report += `${p.x.toFixed(4).padEnd(12)} ${p.y.toFixed(4).padEnd(12)}\n`;
+    });
+    report += `\n`;
+
+    // 2. Результаты по каждой функции
+    report += `[РЕЗУЛЬТАТЫ АППРОКСИМАЦИИ]\n\n`;
+    allResults.forEach(res => {
+        report += `--------------------------------------------------\n`;
+        report += `Функция: ${res.name}\n`;
+        report += `Формула: ${res.formula}\n`;
+        report += `Коэффициенты:\n`;
+        for (const [key, val] of Object.entries(res.params)) {
+            report += `  ${key} = ${val.toFixed(6)}\n`;
+        }
+        report += `СКО (RMS): ${res.rms.toFixed(6)}\n`;
+        report += `R²: ${res.r2.toFixed(6)} (${res.r2Message})\n`;
+        if (res.pearson !== null) {
+            report += `Коэффициент Пирсона: ${res.pearson.toFixed(6)}\n`;
+        }
+        report += `--------------------------------------------------\n`;
+        report += `${'xi'.padEnd(12)} ${'yi'.padEnd(12)} ${'φ(xi)'.padEnd(12)} ${'εi'.padEnd(12)}\n`;
+        res.pointsData.forEach(pm => {
+            report += `${pm.x.toFixed(4).padEnd(12)} ${pm.y.toFixed(4).padEnd(12)} ${pm.phi.toFixed(4).padEnd(12)} ${pm.eps.toFixed(4).padEnd(12)}\n`;
+        });
+        report += `\n\n`;
+    });
+
+    // 3. Наилучшее приближение
+    const best = allResults[0]; // На бэкенде уже отсортировано по RMS
+    report += `========================================\n`;
+    report += `НАИЛУЧШЕЕ ПРИБЛИЖЕНИЕ: ${best.name}\n`;
+    report += `Формула: ${best.formula}\n`;
+    report += `СКО: ${best.rms.toFixed(6)}\n`;
+    report += `R²: ${best.r2.toFixed(6)} (${best.r2Message})\n`;
+    report += `========================================\n`;
+
+    // 4. Скачивание файла
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `mnk_report_${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Привязка кнопки к обработчику (добавьте внутрь document.addEventListener('DOMContentLoaded'))
+const exportBtn = document.getElementById('exportBtn');
+if (exportBtn) {
+    exportBtn.addEventListener('click', () => downloadReport());
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Javalin + График</title>
+    <!-- Подключаем Chart.js через CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; text-align: center; margin-top: 40px; background: #f5f7fa; }
+        h1 { color: #333; }
+        button {
+            padding: 10px 20px; font-size: 16px; cursor: pointer;
+            background: #4CAF50; color: white; border: none; border-radius: 4px;
+        }
+        button:hover { background: #45a049; }
+        .chart-container { max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+<h1>График координат</h1>
+<button id="loadBtn">Получить координаты (1, 1)</button>
+
+<div class="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    // Инициализация точечного графика
+    let chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Координаты (x, y)',
+                data: [],
+                backgroundColor: 'rgba(75, 192, 192, 1)',
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Ось X' }, min: 0, max: 2 },
+                y: { title: { display: true, text: 'Ось Y' }, min: 0, max: 2 }
+            }
+        }
+    });
+
+    // Обработчик кнопки
+    document.getElementById('loadBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/coordinates');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const data = await response.json();
+            console.log('Получены координаты:', data);
+
+            // Добавляем точку на график
+            chart.data.datasets[0].data.push({ x: data.x, y: data.y });
+            chart.update();
+        } catch (error) {
+            console.error('Ошибка при запросе:', error);
+            alert('Не удалось загрузить координаты. Проверьте консоль.');
+        }
+    });
+</script>
+</body>
+</html>

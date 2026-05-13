@@ -1,2 +1,2 @@
 # nm-sem4-lab4
-Swing + JFreeChart
+Javalin + Graph.js

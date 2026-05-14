@@ -12,11 +12,13 @@ export function displayResults(results) {
   if (!tbody) return;
   tbody.innerHTML = '';
 
+
   if (results.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7">Введите от 8 до 12 точек для расчёта</td></tr>`;
     if (panel) panel.style.display = 'none';
     return;
   }
+
 
   const minRms = Math.min(...results.map(r => r.rms));
   results.forEach((res, idx) => {
@@ -25,6 +27,7 @@ export function displayResults(results) {
       tr.style.backgroundColor = '#d4edda';
       tr.style.fontWeight = 'bold';
     }
+    
     tr.innerHTML = `
       <td>${res.name}</td>
       <td><small>${res.formula}</small></td>
@@ -32,7 +35,7 @@ export function displayResults(results) {
       <td>${res.r2.toFixed(4)}</td>
       <td>${res.r2Message}</td>
       <td>${res.pearson != null ? res.pearson.toFixed(4) : '-'}</td>
-      <td><button class="retro-btn retro-btn-secondary details-btn" data-idx="${idx}" style="padding:4px 8px;font-size:12px;">🔍 Подробнее</button></td>
+      <td><button class="retro-btn retro-btn-secondary details-btn" data-idx="${idx}" style="padding:4px 8px;font-size:12px;">Подробнее</button></td>
     `;
     tbody.appendChild(tr);
   });

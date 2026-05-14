@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Лабораторная 4. Аппроксимация</title>
     <link rel="stylesheet" href="/css/style.css">
-    <!-- Обязательно подключаем Chart.js для отрисовки графиков -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
@@ -14,7 +14,7 @@
     <div class="container">
         <div class="header-flex">
             <div class="header-text">
-                <h1>Аппроксимация функций (МНК)</h1>
+                <h1>Аппроксимация функций</h1>
                 <h2>Лабораторная работа №4</h2>
             </div>
             <div class="header-img">
@@ -50,7 +50,7 @@
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
-                            <button type="button" id="exportBtn" class="retro-btn retro-btn-secondary">💾 Сохранить отчет</button>
+                            <button type="button" id="exportBtn" class="retro-btn retro-btn-secondary">Сохранить отчет</button>
                             <!-- <button type="button" id="generateBtn" class="retro-btn retro-btn-secondary">СГЕНЕРИТЬ</button> -->
                         </div>
                         <div id="formStatus" class="status-message"></div>
@@ -87,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- Правая панель: График и Таблица -->
             <div class="graph-panel">
                 <h2 style="margin-top: 0;">График аппроксимации</h2>
                 <div class="graph-box">
@@ -118,11 +117,10 @@
         </div>
     </div>
 
-    <!-- Модальное окно для деталей -->
     <div id="detailsModal" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 id="modalTitle" style="color:var(--retro-primary);">Детали</h2>
+            <h2 id="modalTitle">Детали</h2>
             <div style="max-height: 400px; overflow-y: auto;">
                 <table class="data-table">
                     <thead>

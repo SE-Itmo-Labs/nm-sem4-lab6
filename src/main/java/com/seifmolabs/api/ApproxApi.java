@@ -2,6 +2,7 @@ package com.seifmolabs.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seifmolabs.exceptions.ValidationException;
+import com.seifmolabs.math.Functions;
 import com.seifmolabs.objects.ApproxResult;
 import com.seifmolabs.objects.Point2D;
 import com.seifmolabs.service.ApproximationService;
@@ -70,11 +71,11 @@ public class ApproxApi {
                 throw new ValidationException("Требуется от 8 до 12 точек. Введено: " + points.size());
             }
 
-            // Запуск аппроксимации и сортировка по RMS
+            // approx and RMS sort
             List<ApproxResult> results = new ArrayList<>(service.calculateAll(points));
             results.sort(Comparator.comparingDouble(r -> r.rms));
 
-            // Генерация plotData: 120 точек на [minX-0.5, maxX+0.5]
+            // Plot data generation
             double minX = points.stream().mapToDouble(p -> p.x).min().orElse(0.0);
             double maxX = points.stream().mapToDouble(p -> p.x).max().orElse(0.0);
             double plotStart = minX - 0.5;
@@ -85,7 +86,7 @@ public class ApproxApi {
             for (ApproxResult res : results) {
                 List<Point2D> plotPoints = new ArrayList<>();
                 for (double x = plotStart; x <= plotEnd; x += step) {
-                    double y = evaluateFunction(res, x);
+                    double y = Functions.evaluateFunction(res, x);
                     if (Double.isFinite(y)) {
                         plotPoints.add(new Point2D(x, y));
                     }
@@ -123,19 +124,6 @@ public class ApproxApi {
 
             ctx.json(points);
         });
-    }
-
-    private static double evaluateFunction(ApproxResult res, double x) {
-        Map<String, Double> p = res.params;
-        return switch (res.name) {
-            case "Линейная" -> p.get("a") * x + p.get("b");
-            case "Полином 2-й степени" -> p.get("a2") * x * x + p.get("a1") * x + p.get("a0");
-            case "Полином 3-й степени" -> p.get("a3") * Math.pow(x, 3) + p.get("a2") * x * x + p.get("a1") * x + p.get("a0");
-            case "Экспоненциальная" -> p.get("a") * Math.exp(p.get("b") * x);
-            case "Логарифмическая" -> (x > 0) ? p.get("a") * Math.log(x) + p.get("b") : Double.NaN;
-            case "Степенная" -> (x > 0) ? p.get("a") * Math.pow(x, p.get("b")) : Double.NaN;
-            default -> 0.0;
-        };
     }
 
     public static class CalculateRequest {

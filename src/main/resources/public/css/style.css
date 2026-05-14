@@ -11,7 +11,6 @@
     --retro-mono: "Courier New", monospace;
 }
 
-/* === Базовые стили === */
 body {
     background-color: var(--retro-bg);
     background-image:
@@ -34,7 +33,7 @@ body {
     padding: 15px;
 }
 
-/* === Шапка === */
+
 .header-flex {
     display: flex;
     text-align: center;
@@ -46,13 +45,13 @@ body {
 h1 { color: var(--retro-primary); font-size: 24px; margin: 5px; text-shadow: 2px 2px var(--retro-accent); }
 h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; padding: 5px; border: 2px outset var(--retro-border-dark); }
 
-/* === Marquee === */
+
 .marquee-container {
     background-color: #000000; color: #00ff00; font-family: var(--retro-mono);
     padding: 5px; margin-bottom: 10px; border: 2px inset var(--retro-border-dark);
 }
 
-/* === Основная разметка === */
+
 .main-layout {
     display: grid;
     grid-template-columns: 350px 1fr;
@@ -60,7 +59,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
     margin-bottom: 20px;
 }
 
-/* === Панель ввода === */
+
 .input-panel {
     background-color: var(--retro-bg);
     border: 3px outset var(--retro-border-dark);
@@ -94,7 +93,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
     outline: none; border: 2px outset var(--retro-primary); background-color: #ffffcc;
 }
 
-/* === Кнопки === */
+
 .form-actions { display: flex; gap: 10px; margin-top: 20px; }
 .retro-btn {
     flex: 1; padding: 10px 15px; font-family: var(--retro-font); font-size: 14px; font-weight: bold;
@@ -106,7 +105,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
 .retro-btn-secondary { background: linear-gradient(to bottom, #e0e0e0, #a0a0a0); color: #000000; }
 .retro-btn-secondary:hover { background: linear-gradient(to bottom, #f0f0f0, #b0b0b0); }
 
-/* === Статусы === */
+
 .status-message {
     margin-top: 15px; padding: 10px; border: 2px inset var(--retro-border-dark); font-size: 13px; display: none;
 }
@@ -114,7 +113,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
 .status-message.success { background-color: #ccffcc; border-color: #00aa00; color: #006600; }
 .status-message.error { background-color: #ffcccc; border-color: #aa0000; color: #660000; }
 
-/* === График === */
+
 .graph-panel {
     display: flex;
     flex-direction: column;
@@ -135,7 +134,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
     height: 100% !important;
 }
 
-/* === Таблица результатов === */
+
 .results-section { margin-top: 20px; }
 .data-table {
     width: 100%; border-collapse: collapse; border: 3px outset var(--retro-border-dark); margin-bottom: 20px;
@@ -143,7 +142,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
 .data-table th, .data-table td { border: 1px inset var(--retro-border-dark); padding: 5px; text-align: center; }
 .data-table th { background-color: var(--retro-bg); color: #000000; }
 
-/* === Панель результатов === */
+
 .results-panel {
     margin-top: 20px; padding: 15px; background-color: #f5f5f5; border: 3px ridge var(--retro-border-dark);
 }
@@ -153,7 +152,7 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
 .result-label { font-size: 12px; color: #666666; margin-bottom: 3px; }
 .result-value { font-family: var(--retro-mono); font-size: 16px; font-weight: bold; color: var(--retro-primary); }
 
-/* === Модальное окно === */
+
 .modal {
     position: fixed; z-index: 1000; left: 0; top: 0;
     width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
@@ -167,15 +166,15 @@ h2 { background-color: var(--retro-primary); color: #ffffff; font-size: 18px; pa
 }
 .modal-close:hover { color: #ff0000; }
 
-/* === Чекбоксы функций === */
+
 .graph-controls label { display: block; margin: 5px 0; font-size: 13px; }
 .graph-controls input[type="checkbox"] { margin-right: 5px; }
 
-/* === Футер === */
+
 footer { margin-top: 30px; text-align: center; font-size: 12px; border-top: 2px solid #000000; padding-top: 10px; }
 .footer-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 10px; }
 
-/* === Адаптив === */
+
 @media (max-width: 900px) {
     .main-layout { grid-template-columns: 1fr; }
     .input-panel { order: 2; }
@@ -185,19 +184,19 @@ footer { margin-top: 30px; text-align: center; font-size: 12px; border-top: 2px 
     .header-text, .header-img { width: 100%; }
 }
 
-/* Индикаторы и состояния */
+
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .spinner { border: 3px solid #e5e7eb; border-top: 3px solid #2563eb; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
 .spinner.hidden { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Валидация поля */
+
 textarea.input-data.invalid { border-color: #dc2626; background: #fef2f2; }
 .status-msg { font-size: 14px; margin: 8px 0; min-height: 20px; }
 .status-msg.error { color: #dc2626; }
 .status-msg.success { color: #059669; }
 
-/* Toast-уведомления */
+
 #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
 .toast { padding: 12px 16px; border-radius: 8px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; max-width: 320px; font-size: 14px; cursor: pointer; }
 .toast.error { background: #dc2626; }

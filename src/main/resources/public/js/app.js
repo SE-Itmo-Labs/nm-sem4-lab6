@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pirateVideo.currentTime = 0;
         });
     }
+
+    renderChart([], []);
 });
 
 // === Обработка формы ===
@@ -40,58 +42,67 @@ function initForm() {
     }
 }
 
+window.onGraphUpdate = async (newPoints) => {
+    allPoints = newPoints;
+
+    // Синхронизируем текстовое поле с графиком
+    const pointsInput = document.getElementById('pointsInput');
+    pointsInput.value = allPoints.map(p => `${p.x.toFixed(4)} ${p.y.toFixed(4)}`).join('\n');
+
+    // Проверяем условия для расчета (8 - 12 точек)
+    if (allPoints.length >= 8 && allPoints.length <= 12) {
+        await doCalculate();
+    } else {
+        // Очищаем результаты и перерисовываем только точки (без кривых)
+        allResults = [];
+        displayResults([]);
+        renderChart(allPoints, []);
+
+        if (allPoints.length > 0) {
+            showStatus(`Точек: ${allPoints.length}. Нужно от 8 до 12 для аппроксимации.`, 'warning');
+        }
+    }
+};
+
 async function calculate() {
     const pointsInput = document.getElementById('pointsInput');
-    const statusEl = document.getElementById('formStatus');
+    const lines = pointsInput.value.trim().split('\n').filter(l => l.trim());
 
-    if (!pointsInput) {
-        console.error('Элемент pointsInput не найден');
-        return;
-    }
-
-    const pointsText = pointsInput.value.trim();
-    const lines = pointsText.split('\n').filter(l => l.trim());
-
-    // Валидация количества точек
-    if (lines.length < 8 || lines.length > 12) {
-        showStatus(`Требуется от 8 до 12 точек. Введено: ${lines.length}`, 'error');
-        return;
-    }
-
-    // Парсинг точек
     const points = [];
     for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        const parts = line.split(/\s+/);
-
+        const parts = lines[i].trim().split(/\s+/);
         if (parts.length !== 2) {
-            showStatus(`Ошибка в строке ${i + 1}: "${line}"`, 'error');
-            return;
+            return showStatus(`Ошибка в строке ${i + 1}`, 'error');
         }
-
         const x = parseFloat(parts[0].replace(',', '.'));
         const y = parseFloat(parts[1].replace(',', '.'));
-
         if (isNaN(x) || isNaN(y)) {
-            showStatus(`Ошибка в строке ${i + 1}: неверный формат чисел`, 'error');
-            return;
+            return showStatus(`Ошибка в строке ${i + 1}: неверный формат чисел`, 'error');
         }
-
         points.push({ x, y });
     }
 
     allPoints = points;
 
+    if (allPoints.length < 8 || allPoints.length > 12) {
+        allResults = [];
+        displayResults([]);
+        renderChart(allPoints, []);
+        showStatus(`Требуется от 8 до 12 точек. Введено: ${allPoints.length}`, 'error');
+        return;
+    }
+
+    await doCalculate();
+}
+
+async function doCalculate() {
     try {
         showStatus('Вычисление...', 'info');
 
-        // Отправляем на бэкенд как массив массивов [[x,y], [x,y]...]
         const response = await fetch(`${API_BASE}/calculate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                points: points.map(p => [p.x, p.y])
-            })
+            body: JSON.stringify({ points: allPoints.map(p => [p.x, p.y]) })
         });
 
         const apiResponse = await response.json();
@@ -102,38 +113,32 @@ async function calculate() {
         }
 
         allResults = apiResponse.results;
-
-        // Отображаем результаты
         displayResults(allResults);
-
-        // Рисуем график
         renderChart(allPoints, allResults);
-
         showStatus('Расчёт завершён успешно!', 'success');
 
     } catch (err) {
         showStatus(`Ошибка: ${err.message}`, 'error');
-        console.error(err);
     }
 }
 
-// === Отображение таблицы результатов ===
 function displayResults(results) {
     const tbody = document.getElementById('resultsBody');
-    if (!tbody) {
-        console.error('Элемент resultsBody не найден');
-        return;
-    }
+    const panel = document.getElementById('bestResultPanel');
+    if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    // Находим минимальный RMS для подсветки
+    if (results.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7">Введите от 8 до 12 точек для расчёта (можно кликать по графику)</td></tr>`;
+        if (panel) panel.style.display = 'none';
+        return;
+    }
+
     const minRms = Math.min(...results.map(r => r.rms));
 
     results.forEach((res, idx) => {
         const tr = document.createElement('tr');
-
-        // Подсветка лучшей аппроксимации
         if (res.rms === minRms) {
             tr.style.backgroundColor = '#d4edda';
             tr.style.fontWeight = 'bold';
@@ -157,10 +162,10 @@ function displayResults(results) {
         tbody.appendChild(tr);
     });
 
-    // Обновляем панель лучшего результата
-    const best = results[0]; // Результаты уже отсортированы по RMS на бэкенде
+    const best = results[0]; 
     updateBestResultPanel(best);
 }
+
 
 function updateBestResultPanel(best) {
     const panel = document.getElementById('bestResultPanel');
@@ -288,10 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
-
-
 
 function downloadReport() {
     if (!allPoints.length || !allResults.length) {

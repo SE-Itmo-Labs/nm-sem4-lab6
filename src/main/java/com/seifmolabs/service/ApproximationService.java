@@ -74,41 +74,50 @@ public class ApproximationService {
     }
 
     public ApproxResult expApprox(List<Point2D> points) {
-        if (points.stream().anyMatch(p -> p.y <= 0)) return null;
-        List<Point2D> lin = points.stream().map(p -> new Point2D(p.x, Math.log(p.y))).collect(Collectors.toList());
+        // Оставляем только те точки, где y > 0
+        List<Point2D> validPoints = points.stream().filter(p -> p.y > 0).collect(Collectors.toList());
+        if (validPoints.size() < 2) return null;
+
+        List<Point2D> lin = validPoints.stream().map(p -> new Point2D(p.x, Math.log(p.y))).collect(Collectors.toList());
         ApproxResult linRes = linear(lin);
         if (linRes == null) return null;
 
         double a = Math.exp(linRes.params.get("b"));
         double b = linRes.params.get("a");
         Function<Double, Double> f = x -> a * Math.exp(b * x);
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
+        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
         return build("Экспоненциальная", String.format("y = %.4f * e^(%.4fx)", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 
     public ApproxResult logApprox(List<Point2D> points) {
-        if (points.stream().anyMatch(p -> p.x <= 0)) return null;
-        List<Point2D> lin = points.stream().map(p -> new Point2D(Math.log(p.x), p.y)).collect(Collectors.toList());
+        // Оставляем только те точки, где x > 0
+        List<Point2D> validPoints = points.stream().filter(p -> p.x > 0).collect(Collectors.toList());
+        if (validPoints.size() < 2) return null;
+
+        List<Point2D> lin = validPoints.stream().map(p -> new Point2D(Math.log(p.x), p.y)).collect(Collectors.toList());
         ApproxResult linRes = linear(lin);
         if (linRes == null) return null;
 
         double a = linRes.params.get("a");
         double b = linRes.params.get("b");
         Function<Double, Double> f = x -> a * Math.log(x) + b;
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
+        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
         return build("Логарифмическая", String.format("y = %.4fln(x) + %.4f", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 
     public ApproxResult powApprox(List<Point2D> points) {
-        if (points.stream().anyMatch(p -> p.x <= 0 || p.y <= 0)) return null;
-        List<Point2D> lin = points.stream().map(p -> new Point2D(Math.log(p.x), Math.log(p.y))).collect(Collectors.toList());
+        // Оставляем только те точки, где x > 0 И y > 0
+        List<Point2D> validPoints = points.stream().filter(p -> p.x > 0 && p.y > 0).collect(Collectors.toList());
+        if (validPoints.size() < 2) return null;
+
+        List<Point2D> lin = validPoints.stream().map(p -> new Point2D(Math.log(p.x), Math.log(p.y))).collect(Collectors.toList());
         ApproxResult linRes = linear(lin);
         if (linRes == null) return null;
 
         double a = Math.exp(linRes.params.get("b"));
         double b = linRes.params.get("a");
         Function<Double, Double> f = x -> a * Math.pow(x, b);
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
+        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
         return build("Степенная", String.format("y = %.4f * x^%.4f", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 

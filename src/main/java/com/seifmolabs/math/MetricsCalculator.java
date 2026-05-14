@@ -11,19 +11,6 @@ import java.lang.Math;
 
 public class MetricsCalculator {
 
-    public static class CalcResult {
-        public final double s;
-        public final double rms;
-        public final double r2;
-        public final List<PointMetrics> pointsData;
-
-        public CalcResult(double s, double rms, double r2, List<PointMetrics> pointsData) {
-            this.s = s;
-            this.rms = rms;
-            this.r2 = r2;
-            this.pointsData = pointsData;
-        }
-    }
 
     public static CalcResult calculate(List<Point2D> points, Function<Double, Double> f) {
         int n = points.size();

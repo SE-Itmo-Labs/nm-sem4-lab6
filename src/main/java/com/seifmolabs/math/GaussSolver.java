@@ -4,13 +4,14 @@ import java.lang.Math;
 
 public class GaussSolver {
 
-    /**
-     * Решает СЛАУ методом Гаусса с выбором главного элемента по столбцу.
-     * @param A Матрица коэффициентов n×n
-     * @param B Вектор правых частей
-     * @return Вектор решений или null, если матрица вырождена
-     */
     public static double[] solve(double[][] A, double[] B) {
+        /**
+         * Гаусс с выбором главного элемента
+         * A Матрица коэффициентов n×n
+         * B Вектор правых частей
+         * -> Вектор решений или null, если матрица вырождена
+         */
+
         int n = B.length;
         double[][] M = new double[n][n + 1];
         for (int i = 0; i < n; i++) {
@@ -19,7 +20,7 @@ public class GaussSolver {
         }
 
         for (int i = 0; i < n; i++) {
-            // Частичное выбор главного элемента
+            // Частичный выбор главного элемента
             int maxRow = i;
             double maxVal = Math.abs(M[i][i]);
             for (int k = i + 1; k < n; k++) {

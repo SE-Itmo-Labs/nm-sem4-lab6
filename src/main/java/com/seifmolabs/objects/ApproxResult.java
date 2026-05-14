@@ -13,11 +13,9 @@ public class ApproxResult {
     public Map<String, Double> params;
     public List<PointMetrics> pointsData;
 
-    // Дополнительные поля для фронтенда и восстановления формулы
     public List<Double> coefficients;
     public List<Point2D> plotData;
 
-    // Обязательный конструктор без аргументов для Jackson
     public ApproxResult() {}
 
     public ApproxResult(String name, String formula, double rms, double r2, String r2Message,

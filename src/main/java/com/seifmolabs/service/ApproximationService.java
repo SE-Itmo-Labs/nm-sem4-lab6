@@ -1,5 +1,6 @@
 package com.seifmolabs.service;
 
+import com.seifmolabs.math.CalcResult;
 import com.seifmolabs.math.GaussSolver;
 import com.seifmolabs.math.MetricsCalculator;
 import com.seifmolabs.objects.ApproxResult;
@@ -31,31 +32,47 @@ public class ApproximationService {
         double b = coeffs[1];
         Function<Double, Double> f = x -> a * x + b;
 
-        // Коэффициент корреляции Пирсона
+        // ПИРСОН
         double meanX = sx / n;
         double meanY = sy / n;
+
         double num = points.stream().mapToDouble(p -> (p.x - meanX) * (p.y - meanY)).sum();
         double den1 = points.stream().mapToDouble(p -> Math.pow(p.x - meanX, 2)).sum();
         double den2 = points.stream().mapToDouble(p -> Math.pow(p.y - meanY, 2)).sum();
         double pearson = (den1 > 1e-12 && den2 > 1e-12) ? num / Math.sqrt(den1 * den2) : 0.0;
 
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
-        return build("Линейная", String.format("y = %.4fx + %.4f", a, b), f, m, pearson, Map.of("a", a, "b", b));
+        CalcResult m = MetricsCalculator.calculate(points, f);
+        return build(
+                "Линейная", String.format("y = %.4fx + %.4f", a, b), f, m, pearson, Map.of("a", a, "b", b)
+        );
     }
 
     public ApproxResult poly2(List<Point2D> points) {
         double[] sx = sumsOfX(points, 5);
         double[] sxy = sumsOfXY(points, 3);
 
-        double[][] A = {{sx[4], sx[3], sx[2]}, {sx[3], sx[2], sx[1]}, {sx[2], sx[1], sx[0]}};
+        double[][] A = {
+                {sx[4],
+                        sx[3],
+                        sx[2]}, {sx[3], sx[2], sx[1]}, {sx[2], sx[1], sx[0]}};
         double[] B = {sxy[2], sxy[1], sxy[0]};
         double[] c = GaussSolver.solve(A, B);
-        if (c == null) throw new IllegalArgumentException("Система для полинома 2-й степени вырождена");
+
+        if (c == null)
+            throw new IllegalArgumentException("Система для полинома 2-й степени вырождена");
 
         Function<Double, Double> f = x -> c[0] * Math.pow(x, 2) + c[1] * x + c[2];
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
-        return build("Полином 2-й степени", String.format("y = %.4fx² + %.4fx + %.4f", c[0], c[1], c[2]), f, m, null,
-                Map.of("a2", c[0], "a1", c[1], "a0", c[2]));
+        CalcResult m = MetricsCalculator.calculate(points, f);
+
+
+        return build(
+                "Полином 2-й степени",
+                String.format("y = %.4fx² + %.4fx + %.4f", c[0], c[1], c[2]),
+                f,
+                m,
+                null,
+                Map.of("a2", c[0], "a1", c[1], "a0", c[2])
+        );
     }
 
     public ApproxResult poly3(List<Point2D> points) {
@@ -68,13 +85,13 @@ public class ApproximationService {
         if (c == null) throw new IllegalArgumentException("Система для полинома 3-й степени вырождена");
 
         Function<Double, Double> f = x -> c[0] * Math.pow(x, 3) + c[1] * Math.pow(x, 2) + c[2] * x + c[3];
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(points, f);
+        CalcResult m = MetricsCalculator.calculate(points, f);
         return build("Полином 3-й степени", String.format("y = %.4fx³ + %.4fx² + %.4fx + %.4f", c[0], c[1], c[2], c[3]), f, m, null,
                 Map.of("a3", c[0], "a2", c[1], "a1", c[2], "a0", c[3]));
     }
 
     public ApproxResult expApprox(List<Point2D> points) {
-        // Оставляем только те точки, где y > 0
+        // filter (y > 0)
         List<Point2D> validPoints = points.stream().filter(p -> p.y > 0).collect(Collectors.toList());
         if (validPoints.size() < 2) return null;
 
@@ -84,13 +101,15 @@ public class ApproximationService {
 
         double a = Math.exp(linRes.params.get("b"));
         double b = linRes.params.get("a");
+
         Function<Double, Double> f = x -> a * Math.exp(b * x);
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
+        CalcResult m = MetricsCalculator.calculate(validPoints, f);
+
         return build("Экспоненциальная", String.format("y = %.4f * e^(%.4fx)", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 
     public ApproxResult logApprox(List<Point2D> points) {
-        // Оставляем только те точки, где x > 0
+        // x > 0
         List<Point2D> validPoints = points.stream().filter(p -> p.x > 0).collect(Collectors.toList());
         if (validPoints.size() < 2) return null;
 
@@ -101,12 +120,12 @@ public class ApproximationService {
         double a = linRes.params.get("a");
         double b = linRes.params.get("b");
         Function<Double, Double> f = x -> a * Math.log(x) + b;
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
+        CalcResult m = MetricsCalculator.calculate(validPoints, f);
         return build("Логарифмическая", String.format("y = %.4fln(x) + %.4f", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 
     public ApproxResult powApprox(List<Point2D> points) {
-        // Оставляем только те точки, где x > 0 И y > 0
+        //  x > 0 И y > 0
         List<Point2D> validPoints = points.stream().filter(p -> p.x > 0 && p.y > 0).collect(Collectors.toList());
         if (validPoints.size() < 2) return null;
 
@@ -116,12 +135,15 @@ public class ApproximationService {
 
         double a = Math.exp(linRes.params.get("b"));
         double b = linRes.params.get("a");
+
         Function<Double, Double> f = x -> a * Math.pow(x, b);
-        MetricsCalculator.CalcResult m = MetricsCalculator.calculate(validPoints, f);
+        CalcResult m = MetricsCalculator.calculate(validPoints, f);
+
         return build("Степенная", String.format("y = %.4f * x^%.4f", a, b), f, m, null, Map.of("a", a, "b", b));
     }
 
     public List<ApproxResult> calculateAll(List<Point2D> points) {
+
         List<ApproxResult> results = new ArrayList<>();
         results.add(linear(points));
         results.add(poly2(points));
@@ -134,16 +156,7 @@ public class ApproximationService {
         return results.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public ApproxResult getBest(ApproxResult[] results) {
-        if (results == null || results.length == 0) return null;
-        ApproxResult best = results[0];
-        for (ApproxResult r : results) {
-            if (r != null && r.rms < best.rms) best = r;
-        }
-        return best;
-    }
 
-    // Вспомогательные методы
     private double[] sumsOfX(List<Point2D> points, int count) {
         double[] sums = new double[count];
         for (int k = 0; k < count; k++) {
@@ -163,7 +176,7 @@ public class ApproximationService {
     }
 
     private ApproxResult build(String name, String formula, Function<Double, Double> f,
-                               MetricsCalculator.CalcResult m, Double pearson, Map<String, Double> params) {
+                               CalcResult m, Double pearson, Map<String, Double> params) {
         ApproxResult res = new ApproxResult();
         res.name = name;
         res.formula = formula;

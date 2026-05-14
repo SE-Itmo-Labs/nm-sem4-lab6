@@ -16,8 +16,7 @@ public class ApiResponse {
         this.chartData = chartData;
         this.error = error;
     }
-
-    // Статические фабрики для удобства использования в ApproxApi
+    
     public static ApiResponse ok(List results, Map<String, Object> chartData) {
         return new ApiResponse(results, chartData, null);
     }

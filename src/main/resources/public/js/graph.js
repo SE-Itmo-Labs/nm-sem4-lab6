@@ -1,11 +1,11 @@
 let chartInstance = null;
 
 const LINE_COLORS = [
-    'rgba(54, 162, 235, 1)',  // синий
-    'rgba(255, 99, 132, 1)',  // розовый
-    'rgba(75, 192, 192, 1)',  // бирюзовый
-    'rgba(153, 102, 255, 1)', // фиолетовый
-    'rgba(255, 159, 64, 1)'   // оранжевый
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 99, 132, 1)', 
+    'rgba(75, 192, 192, 1)',  
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'  
 ];
 
 export function renderChart(points, results) {
@@ -14,18 +14,18 @@ export function renderChart(points, results) {
 
     const datasets = [];
 
-    // 1. Исходные точки (красные маркеры)
+
     datasets.push({
         label: 'Исходные данные',
         data: points.map(p => ({ x: p.x, y: p.y })),
         showLine: false,
         pointBackgroundColor: 'red',
-        pointRadius: 6,       // Увеличен радиус для удобства клика
+        pointRadius: 6,      
         pointHoverRadius: 9,
         order: 2
     });
 
-    // 2. Аппроксимирующие функции
+
     if (results && results.length > 0) {
         results.forEach((res, idx) => {
             const color = LINE_COLORS[idx % LINE_COLORS.length];
@@ -42,7 +42,6 @@ export function renderChart(points, results) {
                 hidden: idx !== 0
             });
 
-            // Динамическое создание чекбокса
             const label = document.createElement('label');
             label.style.marginRight = '14px';
             label.style.cursor = 'pointer';
@@ -74,7 +73,7 @@ export function renderChart(points, results) {
         });
     }
 
-    // Вычисляем границы осей
+
     let xMin, xMax, yMin, yMax;
     if (points.length > 0) {
         const xVals = points.map(p => p.x);
@@ -86,7 +85,7 @@ export function renderChart(points, results) {
 
         const xDiff = maxX - minX;
         const yDiff = maxY - minY;
-        const marginX = xDiff === 0 ? 5 : xDiff * 0.2; // Отступ 20% или фиксированный, если 1 точка
+        const marginX = xDiff === 0 ? 5 : xDiff * 0.2;
         const marginY = yDiff === 0 ? 5 : yDiff * 0.2;
 
         xMin = minX - marginX;
@@ -107,7 +106,7 @@ export function renderChart(points, results) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // Ваш существующий обработчик кликов (добавление/удаление точек)
+
             onClick: (e, elements, chart) => {
                 if (elements.length > 0) {
                     const pt = elements.find(el => el.datasetIndex === 0);
@@ -128,7 +127,6 @@ export function renderChart(points, results) {
             plugins: {
                 legend: { display: true, position: 'top' },
                 tooltip: { enabled: true },
-                // 🔽 НАСТРОЙКА ZOOM & PAN 🔽
                 zoom: {
                     zoom: {
                         wheel: { enabled: true },      // Зум колесом мыши
@@ -138,7 +136,6 @@ export function renderChart(points, results) {
                     pan: {
                         enabled: true,                 // Включить перемещение
                         mode: 'xy',                    // Перемещение по X и Y
-                        // modifierKey: 'ctrl'          // (Опционально) перемещение только при зажатом Ctrl
                     },
                     limits: {
                         x: { minRange: 0.5 },          // Не даем зумить "в бесконечность"

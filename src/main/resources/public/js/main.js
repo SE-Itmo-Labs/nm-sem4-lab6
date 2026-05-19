@@ -57,11 +57,11 @@ function initForm() {
 
     state.points = points;
 
-    if (state.points.length < 8 || state.points.length > 12) {
+    if (state.points.length < 7 || state.points.length > 12) {
       state.results = [];
       displayResults([]);
       renderChart(state.points, []);
-      return showStatus(`Требуется от 8 до 12 точек. Введено: ${state.points.length}`, 'error');
+      return showStatus(`Требуется от 7 до 12 точек. Введено: ${state.points.length}`, 'error');
     }
 
     await doCalculate();

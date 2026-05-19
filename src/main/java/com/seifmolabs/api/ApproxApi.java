@@ -8,8 +8,6 @@ import com.seifmolabs.objects.Point2D;
 import com.seifmolabs.service.ApproximationService;
 import io.javalin.Javalin;
 
-import com.seifmolabs.api.ApiResponse;
-
 import java.util.*;
 
 public class ApproxApi {
@@ -67,11 +65,11 @@ public class ApproxApi {
                 points.add(new Point2D(x, y));
             }
 
-            if (points.size() < 8 || points.size() > 12) {
-                throw new ValidationException("Требуется от 8 до 12 точек. Введено: " + points.size());
+            if (points.size() < 7 || points.size() > 12) {
+                throw new ValidationException("Требуется от 7 до 12 точек. Введено: " + points.size());
             }
 
-            // approx and RMS sort
+            // аппрокс и СКО
             List<ApproxResult> results = new ArrayList<>(service.calculateAll(points));
             results.sort(Comparator.comparingDouble(r -> r.rms));
 

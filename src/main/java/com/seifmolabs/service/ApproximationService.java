@@ -18,10 +18,17 @@ public class ApproximationService {
 
     public ApproxResult linear(List<Point2D> points) {
         double n = points.size();
-        double sx = points.stream().mapToDouble(p -> p.x).sum();
-        double sy = points.stream().mapToDouble(p -> p.y).sum();
-        double sx2 = points.stream().mapToDouble(p -> p.x * p.x).sum();
-        double sxy = points.stream().mapToDouble(p -> p.x * p.y).sum();
+        double sx = 0;
+        double sy = 0;
+        double sx2 = 0;
+        double sxy = 0;
+
+        for (Point2D p : points) {
+            sx += p.x;
+            sy += p.y;
+            sx2 += p.x * p.x;
+            sxy += p.x * p.y;
+        }
 
         double[][] A = {{sx2, sx}, {sx, n}};
         double[] B = {sxy, sy};
@@ -36,10 +43,23 @@ public class ApproximationService {
         double meanX = sx / n;
         double meanY = sy / n;
 
-        double num = points.stream().mapToDouble(p -> (p.x - meanX) * (p.y - meanY)).sum();
-        double den1 = points.stream().mapToDouble(p -> Math.pow(p.x - meanX, 2)).sum();
-        double den2 = points.stream().mapToDouble(p -> Math.pow(p.y - meanY, 2)).sum();
-        double pearson = (den1 > 1e-12 && den2 > 1e-12) ? num / Math.sqrt(den1 * den2) : 0.0;
+        double num = 0.0;
+        double den1 = 0.0;
+        double den2 = 0.0;
+
+        for (Point2D p : points) {
+            double dx = p.x - meanX;
+            double dy = p.y - meanY;
+            num += dx * dy;
+            den1 += dx * dx;
+            den2 += dy * dy;
+        }
+
+        double pearson = 0;
+
+        if (den1 > 1e-12 && den2 > 1e-12) {
+            pearson = num / Math.sqrt(den1 * den2);
+        }
 
         CalcResult m = MetricsCalculator.calculate(points, f);
         return build(
@@ -63,7 +83,6 @@ public class ApproximationService {
 
         Function<Double, Double> f = x -> c[0] * Math.pow(x, 2) + c[1] * x + c[2];
         CalcResult m = MetricsCalculator.calculate(points, f);
-
 
         return build(
                 "Полином 2-й степени",
@@ -92,10 +111,21 @@ public class ApproximationService {
 
     public ApproxResult expApprox(List<Point2D> points) {
         // filter (y > 0)
-        List<Point2D> validPoints = points.stream().filter(p -> p.y > 0).collect(Collectors.toList());
+
+        List<Point2D> validPoints = new ArrayList<>();
+        for (Point2D p : points) {
+            if (p.y > 0) {
+                validPoints.add(p);
+            }
+        }
+
         if (validPoints.size() < 2) return null;
 
-        List<Point2D> lin = validPoints.stream().map(p -> new Point2D(p.x, Math.log(p.y))).collect(Collectors.toList());
+        List<Point2D> lin = new ArrayList<>();
+        for (Point2D p : validPoints) {
+            lin.add(new Point2D(p.x, Math.log(p.y)));
+        }
+
         ApproxResult linRes = linear(lin);
         if (linRes == null) return null;
 
@@ -152,10 +182,8 @@ public class ApproximationService {
         results.add(logApprox(points));
         results.add(powApprox(points));
 
-        // Убираем null (возникают при нарушении области определения y>0, x>0)
         return results.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
-
 
     private double[] sumsOfX(List<Point2D> points, int count) {
         double[] sums = new double[count];

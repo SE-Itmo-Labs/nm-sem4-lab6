@@ -5,7 +5,7 @@ import { initModal } from './modal.js';
 import { downloadReport } from './report.js';
 import { initFileHandlers } from './fileHandlers.js';
 
-const state = { points: [], results: [] };
+const state = { points: [], results: [], funcType: null };
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -24,27 +24,31 @@ document.addEventListener('DOMContentLoaded', () => {
 window.onGraphUpdate = async (newPoints) => {
 
   state.points = newPoints;
+  state.funcType = null; 
   syncInputWithPoints();
-  if (state.points.length >= 8 && state.points.length <= 12) {
+
+  if (state.points.length >= 2 && state.points.length <= 100) {
     await doCalculate();
   } else {
-
     state.results = [];
     displayResults([]);
     renderChart(state.points, []);
-    if (state.points.length > 0) showStatus(`Точек: ${state.points.length}. Нужно от 8 до 12.`, 'warning');
-
+    if (state.points.length > 0) showStatus(`Точек: ${state.points.length}. Нужно от 2 до 100`, 'warning');
   }
 };
 
 function initForm() {
 
-  document.getElementById('dataForm')?.addEventListener('submit', async (e) => {
-    
+  const pointsInput = document.getElementById('pointsInput');
+
+  pointsInput?.addEventListener('input', () => {
+    state.funcType = null;
+  });
+
+    document.getElementById('dataForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const input = document.getElementById('pointsInput');
-    const lines = input.value.trim().split('\n').filter(l => l.trim());
+    const lines = pointsInput.value.trim().split('\n').filter(l => l.trim());
     const points = [];
 
     for (let i = 0; i < lines.length; i++) {
@@ -58,11 +62,11 @@ function initForm() {
 
     state.points = points;
 
-    if (state.points.length < 7 || state.points.length > 12) {
+    if (state.points.length < 2 || state.points.length > 100) {
       state.results = [];
       displayResults([]);
       renderChart(state.points, []);
-      return showStatus(`Требуется от 7 до 12 точек. Введено: ${state.points.length}`, 'error');
+      return showStatus(`Требуется от 2 до 100 точек. Введено: ${state.points.length}`, 'error');
     }
 
     await doCalculate();
@@ -72,8 +76,11 @@ function initForm() {
 async function doCalculate() {
   showStatus('Вычисление...', 'info');
   try {
+    
     const targetX = parseFloat(document.getElementById('targetXInput').value) || 0;
-    const res = await fetchCalculate(state.points, targetX);
+
+    const res = await fetchCalculate(state.points, targetX, state.funcType);
+
     if (res.error) return showStatus(`Ошибка сервера: ${res.error}`, 'error');
     
     state.results = res.results;
@@ -166,6 +173,8 @@ function initFuncGenerator() {
             
             text += `${x.toFixed(4)} ${y.toFixed(4)}\n`;
         }
+        
+        state.funcType = parseInt(funcType);
         inputArea.value = text.trim();
         showStatus("Данные сгенерированы! Нажмите 'Рассчитать'", "success");
     });

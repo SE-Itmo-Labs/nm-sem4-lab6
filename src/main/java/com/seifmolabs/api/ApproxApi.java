@@ -63,6 +63,17 @@ public class ApproxApi {
 
             List<Map<String, Object>> results = new ArrayList<>();
 
+            if (req.funcType != null) {
+                java.util.function.Function<Double, Double> origFunc = null;
+                if (req.funcType == 1) origFunc = Math::cos;
+                else if (req.funcType == 2) origFunc = x -> Math.pow(x, 3) - 4 * Math.pow(x, 2) + 6 * x - 2.1;
+                else if (req.funcType == 3) origFunc = x -> 0.5 * Math.exp(x);
+
+                if (origFunc != null) {
+                    results.add(buildMethodResult("Исходная функция", origFunc.apply(targetX), points, origFunc));
+                }
+            }
+
             // 1. Лагранж
             results.add(buildMethodResult("Многочлен Лагранжа", service.lagrange(points, targetX), points, x -> service.lagrange(points, x)));
 
@@ -128,6 +139,7 @@ public class ApproxApi {
     public static class CalculateRequest {
         public double[][] points;
         public Double targetX;
+        public Integer funcType;
     }
 
     public static class GenerateRequest {
@@ -139,13 +151,24 @@ public class ApproxApi {
         map.put("name", name);
         map.put("targetValue", targetValue);
         
-        // Генерация точек для графика (отрисовка полинома)
         List<Point2D> plotData = new ArrayList<>();
-        double minX = points.get(0).x - 1;
-        double maxX = points.get(points.size() - 1).x + 1;
-        double step = (maxX - minX) / 100.0;
-        for (double x = minX; x <= maxX; x += step) {
-            plotData.add(new Point2D(x, func.apply(x)));
+        double minX = points.get(0).x;
+        double maxX = points.get(points.size() - 1).x;
+        
+
+        double span = maxX - minX;
+        if (span == 0) span = 1.0; 
+        double padding = span * 0.15;
+        double plotStart = minX - padding;
+        double plotEnd = maxX + padding;
+        
+
+        double step = (plotEnd - plotStart) / 150.0; 
+        for (double x = plotStart; x <= plotEnd; x += step) {
+            double y = func.apply(x);
+            if (Double.isFinite(y)) {
+                plotData.add(new Point2D(x, y));
+            }
         }
         map.put("plotData", plotData);
         return map;

@@ -1,13 +1,12 @@
 let chartInstance = null;
 
 const LINE_COLORS = [
-    'rgba(54, 162, 235, 1)',
-    'rgba(255, 99, 132, 1)', 
-    'rgba(75, 192, 192, 1)',  
+    'rgba(54, 162, 235, 1)', 
+    'rgba(255, 99, 132, 1)',
+    'rgba(75, 192, 192, 1)',   
     'rgba(153, 102, 255, 1)',
-    'rgba(255, 159, 64, 1)'  
+    'rgba(255, 159, 64, 1)'
 ];
-
 export function renderChart(points, results) {
     const checkboxesContainer = document.getElementById('chartCheckboxes');
     checkboxesContainer.innerHTML = '';
@@ -28,7 +27,11 @@ export function renderChart(points, results) {
 
     if (results && results.length > 0) {
         results.forEach((res, idx) => {
-            const color = LINE_COLORS[idx % LINE_COLORS.length];
+
+            const isOriginal = res.name === 'Исходная функция';
+            const color = isOriginal ? 'rgba(128, 128, 128, 0.8)' : LINE_COLORS[idx % LINE_COLORS.length];
+
+            const isShownDefault = isOriginal || res.name.includes('Лагранж');
 
             datasets.push({
                 label: res.name,
@@ -38,7 +41,7 @@ export function renderChart(points, results) {
                 borderColor: color,
                 backgroundColor: color,
                 borderWidth: 2,
-                order: 1,
+                order: isOriginal ? 3 : 1, 
                 hidden: idx !== 0
             });
 
@@ -53,7 +56,7 @@ export function renderChart(points, results) {
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.checked = idx === 0;
-            cb.dataset.datasetIndex = idx + 1;
+            cb.dataset.datasetIndex = datasets.length - 1; 
 
             cb.addEventListener('change', (e) => {
                 const i = parseInt(e.target.dataset.datasetIndex);

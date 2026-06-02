@@ -15,7 +15,7 @@
         <div class="header-flex">
             <div class="header-text">
                 <h1>Аппроксимация функций</h1>
-                <h2>Лабораторная работа №4</h2>
+                <h2>Лабораторная работа №5</h2>
             </div>
             <div class="header-img">
                 <video id="pirateVideo" class="header-video" muted playsinline loop autoplay>
@@ -39,13 +39,19 @@
 
                             <textarea id="pointsInput" class="retro-input" rows="12" placeholder="X Y&#10;0.0 0.0&#10;0.4 2.962..."></textarea>
                             <div class="form-group" style="margin-top: 12px; border-top: 1px dashed #808080; padding-top: 10px;">
-                            <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
-                            <div class="form-actions" style="margin-top: 8px;">
-                                <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
-                                <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
-                                <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
+                                
+                                <!-- ЗДЕСЬ БУДЕТ ФОРМА ТАКОГО ВИДА: ВЫБОР, ГЕНЕРИРОВАТЬ ЛИ ИНТЕРПОЛЯЦИЮ ПО ФУНКЦИИ (f(x) = cos(x; f(x) = x^3 - 4x^2 + 6x - 2.1; f(x) = 0.5*e^x)) ; ЛИБО МЫ ДЕЛАЕМ  -->
+                                <!--В ФОРМЕ ПО ГЕНЕРАЦИИ - начало (a) : int от -1000 до 1000; конец (b) : от -1000 до 1000. Проверка на b<a в бекенде ; количество точек (от 1 до 15).-->
+                                <!-- Также ниже должно быть поле : найти значение в точке X*: ... -->
+                                 <!-- Также если юзер решит посчитать экстраполяцию (не интерполяцию), то должно об этом выводиться сообщение со словами (Произошла экстраполяция функции, значения могут быть неточными) -->
+                                
+                                 <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
+                                <div class="form-actions" style="margin-top: 8px;">
+                                    <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
+                                    <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
+                                    <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
+                                </div>
                             </div>
-                        </div>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
@@ -83,11 +89,16 @@
                             <span class="result-value" id="bestMessage" style="font-size: 12px;"></span>
                         </div>
                     </div>
+
+                    <div>
+                        <!-- здесь должна быть таблица разностей для интерполяции | x | y | Δy, Δ^2 y, Δ... -->
+                    </div>
                 </div>
             </div>
 
             <div class="graph-panel">
-                <h2 style="margin-top: 0;">График аппроксимации</h2>
+                <h2 style="margin-top: 0;">График интерполяции</h2>
+                <!-- Здесь после графика - результат интерполяции,  -->
                 <div class="graph-box">
                     <canvas id="chartCanvas"></canvas>
                 </div>
@@ -96,7 +107,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Функция</th>
+                       Ё         <th>Функция</th>
                                 <th>Формула</th>
                                 <th>СКО</th>
                                 <th>R²</th>

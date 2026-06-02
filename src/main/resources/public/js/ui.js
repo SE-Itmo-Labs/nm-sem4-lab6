@@ -7,44 +7,26 @@ export function showStatus(msg, type) {
 }
 
 export function displayResults(results) {
-  const tbody = document.getElementById('resultsBody');
   const panel = document.getElementById('bestResultPanel');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-
-
+  if (!panel) return;
+  
   if (results.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7">Введите от 8 до 12 точек для расчёта</td></tr>`;
-    if (panel) panel.style.display = 'none';
+    panel.style.display = 'none';
     return;
   }
 
-
-  const minRms = Math.min(...results.map(r => r.rms));
-  results.forEach((res, idx) => {
-    const tr = document.createElement('tr');
-    if (res.rms === minRms) {
-      tr.style.backgroundColor = '#d4edda';
-      tr.style.fontWeight = 'bold';
-    }
-    
-    tr.innerHTML = `
-      <td>${res.name}</td>
-      <td><small>${res.formula}</small></td>
-      <td>${res.rms.toFixed(4)}</td>
-      <td>${res.r2.toFixed(4)}</td>
-      <td>${res.r2Message}</td>
-      <td>${res.pearson != null ? res.pearson.toFixed(4) : '-'}</td>
-      <td><button class="retro-btn retro-btn-secondary details-btn" data-idx="${idx}" style="padding:4px 8px;font-size:12px;">Подробнее</button></td>
-    `;
-    tbody.appendChild(tr);
+  let html = `<h3 style="color:var(--retro-primary);">Результаты в точке X*</h3>`;
+  results.forEach(res => {
+      html += `
+        <div class="result-item" style="margin-bottom: 5px;">
+            <span class="result-label">${res.name}</span>
+            <span class="result-value">P(X*) = ${res.targetValue.toFixed(6)}</span>
+        </div>
+      `;
   });
-
-  updateBestResultPanel(results[0]);
-
-  tbody.querySelectorAll('.details-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => window.showDetails(parseInt(e.target.dataset.idx)));
-  });
+  
+  panel.innerHTML = html;
+  panel.style.display = 'block';
 }
 
 function updateBestResultPanel(best) {

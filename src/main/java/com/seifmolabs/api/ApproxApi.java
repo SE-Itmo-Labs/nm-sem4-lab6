@@ -1,18 +1,22 @@
 package com.seifmolabs.api;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seifmolabs.exceptions.ValidationException;
-import com.seifmolabs.math.Functions;
-import com.seifmolabs.objects.ApproxResult;
 import com.seifmolabs.objects.Point2D;
-import com.seifmolabs.service.ApproximationService;
-import io.javalin.Javalin;
+import com.seifmolabs.service.InterpolationService;
 
-import java.util.*;
+import io.javalin.Javalin;
 
 public class ApproxApi {
     private static final ObjectMapper json = new ObjectMapper();
-    private static final ApproximationService service = new ApproximationService();
+    private static final InterpolationService service = new InterpolationService();
 
     public static void register(Javalin app) {
 
@@ -42,58 +46,55 @@ public class ApproxApi {
         // 3. POST /api/calculate
         app.post("/api/calculate", ctx -> {
             CalculateRequest req = ctx.bodyAsClass(CalculateRequest.class);
-
-            if (req.points == null) {
-                throw new ValidationException("Поле 'points' обязательно");
-            }
+            if (req.points == null || req.points.length < 2) throw new ValidationException("Нужно минимум 2 точки");
 
             List<Point2D> points = new ArrayList<>();
-            Set<Double> uniqueX = new HashSet<>();
 
             for (double[] pair : req.points) {
-                if (pair == null || pair.length != 2) {
-                    throw new ValidationException("Каждая точка должна быть массивом из двух чисел [x, y]");
-                }
-                double x = pair[0];
-                double y = pair[1];
-                if (Double.isNaN(x) || Double.isInfinite(x) || Double.isNaN(y) || Double.isInfinite(y)) {
-                    throw new ValidationException("Координаты должны быть корректными числами");
-                }
-                if (!uniqueX.add(x)) {
-                    throw new ValidationException("Значения X должны быть уникальными");
-                }
-                points.add(new Point2D(x, y));
+                points.add(new Point2D(pair[0], pair[1]));
             }
 
-            if (points.size() < 7 || points.size() > 12) {
-                throw new ValidationException("Требуется от 7 до 12 точек. Введено: " + points.size());
-            }
+            points.sort(Comparator.comparingDouble(p -> p.x));
 
-            // аппрокс и СКО
-            List<ApproxResult> results = new ArrayList<>(service.calculateAll(points));
-            results.sort(Comparator.comparingDouble(r -> r.rms));
+            double targetX = req.targetX != null ? req.targetX : points.get(0).x;
+            
+            boolean isEquidistant = service.isEquidistant(points);
+            double[][] diffTable = isEquidistant ? service.finiteDifferences(points) : service.dividedDifferences(points);
 
-            // Plot data generation
-            double minX = points.stream().mapToDouble(p -> p.x).min().orElse(0.0);
-            double maxX = points.stream().mapToDouble(p -> p.x).max().orElse(0.0);
-            double plotStart = minX - 0.5;
-            double plotEnd = maxX + 0.5;
-            int steps = 120;
-            double step = (plotEnd - plotStart) / steps;
+            List<Map<String, Object>> results = new ArrayList<>();
 
-            for (ApproxResult res : results) {
-                List<Point2D> plotPoints = new ArrayList<>();
-                for (double x = plotStart; x <= plotEnd; x += step) {
-                    double y = Functions.evaluateFunction(res, x);
-                    if (Double.isFinite(y)) {
-                        plotPoints.add(new Point2D(x, y));
-                    }
+            // 1. Лагранж
+            results.add(buildMethodResult("Многочлен Лагранжа", service.lagrange(points, targetX), points, x -> service.lagrange(points, x)));
+
+            // 2. Ньютон разд разности
+            double[][] divDiff = service.dividedDifferences(points);
+            results.add(buildMethodResult("Ньютон (разделенные разности)", service.newtonDivided(points, divDiff, targetX), points, x -> service.newtonDivided(points, divDiff, x)));
+
+            // 3. Ньютон конечные разн
+            if (isEquidistant) {
+                double[][] finDiff = service.finiteDifferences(points);
+                // Если X ближе к началу - 1я формула, если к концу - 2я
+                double midX = (points.get(0).x + points.get(points.size() - 1).x) / 2.0;
+                if (targetX <= midX) {
+                    results.add(buildMethodResult("Ньютон (конечные разн., 1-я форма - вперед)", service.newtonFiniteForward(points, finDiff, targetX), points, x -> service.newtonFiniteForward(points, finDiff, x)));
+                } else {
+                    results.add(buildMethodResult("Ньютон (конечные разн., 2-я форма - назад)", service.newtonFiniteBackward(points, finDiff, targetX), points, x -> service.newtonFiniteBackward(points, finDiff, x)));
                 }
-                res.plotData = plotPoints;
             }
 
-            ctx.json(ApiResponse.ok(results, Map.of()));
+            double minX = points.get(0).x;
+            double maxX = points.get(points.size() - 1).x;
+            String warning = (targetX < minX || targetX > maxX) ? "Внимание: Произошла экстраполяция функции, значения могут быть неточными" : null;
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("results", results);
+            response.put("diffTable", diffTable);
+            response.put("isEquidistant", isEquidistant);
+            response.put("warning", warning);
+
+            ctx.json(response);
         });
+        
 
         // 4. POST /api/generate-random
         app.post("/api/generate-random", ctx -> {
@@ -126,9 +127,27 @@ public class ApproxApi {
 
     public static class CalculateRequest {
         public double[][] points;
+        public Double targetX;
     }
 
     public static class GenerateRequest {
         public Integer count;
+    }
+
+    private static Map<String, Object> buildMethodResult(String name, double targetValue, List<Point2D> points, java.util.function.Function<Double, Double> func) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("targetValue", targetValue);
+        
+        // Генерация точек для графика (отрисовка полинома)
+        List<Point2D> plotData = new ArrayList<>();
+        double minX = points.get(0).x - 1;
+        double maxX = points.get(points.size() - 1).x + 1;
+        double step = (maxX - minX) / 100.0;
+        for (double x = minX; x <= maxX; x += step) {
+            plotData.add(new Point2D(x, func.apply(x)));
+        }
+        map.put("plotData", plotData);
+        return map;
     }
 }

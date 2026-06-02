@@ -38,20 +38,68 @@
                             <label for="pointsInput">Точки (8-12):</label>
 
                             <textarea id="pointsInput" class="retro-input" rows="12" placeholder="X Y&#10;0.0 0.0&#10;0.4 2.962..."></textarea>
-                            <div class="form-group" style="margin-top: 12px; border-top: 1px dashed #808080; padding-top: 10px;">
+                            <!-- <div class="form-group" style="margin-top: 12px; border-top: 1px dashed #808080; padding-top: 10px;"> -->
                                 
                                 <!-- ЗДЕСЬ БУДЕТ ФОРМА ТАКОГО ВИДА: ВЫБОР, ГЕНЕРИРОВАТЬ ЛИ ИНТЕРПОЛЯЦИЮ ПО ФУНКЦИИ (f(x) = cos(x; f(x) = x^3 - 4x^2 + 6x - 2.1; f(x) = 0.5*e^x)) ; ЛИБО МЫ ДЕЛАЕМ  -->
                                 <!--В ФОРМЕ ПО ГЕНЕРАЦИИ - начало (a) : int от -1000 до 1000; конец (b) : от -1000 до 1000. Проверка на b<a в бекенде ; количество точек (от 1 до 15).-->
                                 <!-- Также ниже должно быть поле : найти значение в точке X*: ... -->
                                  <!-- Также если юзер решит посчитать экстраполяцию (не интерполяцию), то должно об этом выводиться сообщение со словами (Произошла экстраполяция функции, значения могут быть неточными) -->
                                 
-                                 <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
+                                 <!-- <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
                                 <div class="form-actions" style="margin-top: 8px;">
                                     <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
                                     <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
                                     <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
                                 </div>
+                            </div> -->
+
+                            <label style="color: #000080; font-weight: bold;">Способ ввода:</label>
+                            <div style="margin-bottom: 10px;">
+                                <input type="radio" id="modeManual" name="inputMode" value="manual" checked>
+                                <label for="modeManual" style="display:inline; font-weight:normal;">Таблица / Файл</label>
+                                <input type="radio" id="modeFunc" name="inputMode" value="function" style="margin-left:10px;">
+                                <label for="modeFunc" style="display:inline; font-weight:normal;">По функции</label>
                             </div>
+
+                            <!-- Блок генерации по функции -->
+                            <div id="funcGenBlock" style="display: none; background: #f0f0f0; padding: 10px; border: 1px inset #808080; margin-bottom: 10px;">
+                                <label>Выберите функцию:</label>
+                                <select id="funcSelect" class="retro-select" style="margin-bottom: 10px;">
+                                    <option value="1">f(x) = cos(x)</option>
+                                    <option value="2">f(x) = x³ - 4x² + 6x - 2.1</option>
+                                    <option value="3">f(x) = 0.5 * e^x</option>
+                                </select>
+                                
+                                <div class="input-row" style="margin-bottom: 10px;">
+                                    <div>
+                                        <label>Начало (a):</label>
+                                        <input type="number" id="funcA" class="retro-input" value="-5" min="-1000" max="1000" step="0.1">
+                                    </div>
+                                    <div>
+                                        <label>Конец (b):</label>
+                                        <input type="number" id="funcB" class="retro-input" value="5" min="-1000" max="1000" step="0.1">
+                                    </div>
+                                    <div>
+                                        <label>Точек (N):</label>
+                                        <input type="number" id="funcN" class="retro-input" value="10" min="2" max="15">
+                                    </div>
+                                </div>
+                                <button type="button" id="genFuncBtn" class="retro-btn retro-btn-secondary" style="width:100%;">Сгенерировать точки</button>
+                            </div>
+
+                            <!-- Целевая точка X* -->
+                            <div style="margin-bottom: 10px; background: #ffffcc; padding: 10px; border: 1px inset #808080;">
+                                <label for="targetXInput" style="color: red;">Найти значение в точке X*:</label>
+                                <input type="number" id="targetXInput" class="retro-input" step="0.01" value="0.5" placeholder="Например, 1.5">
+                            </div>
+
+                            <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
+                            <div class="form-actions" style="margin-top: 8px;">
+                                <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
+                                <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
+                                <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
+                            </div>
+                                                    
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
@@ -71,27 +119,21 @@
 
                 <div id="bestResultPanel" class="results-panel" style="display:none;">
                     <h3>Наилучшее приближение</h3>
-                    <div class="results-grid">
-                        <div class="result-item">
-                            <span class="result-label">Формула</span>
-                            <span class="result-value" id="bestFormula" style="font-size: 13px;"></span>
+                    <div class="results-section">
+                        <h3 style="color:var(--retro-primary);">Таблица разностей</h3>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table" id="diffTable">
+                                <thead>
+                                    <tr id="diffTableHead">
+                                        <th>X</th>
+                                        <th>Y</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="diffTableBody">
+                                    <tr><td colspan="2">Нет данных</td></tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="result-item">
-                            <span class="result-label">СКО (RMS)</span>
-                            <span class="result-value" id="bestRms"></span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">R²</span>
-                            <span class="result-value" id="bestR2"></span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Вывод</span>
-                            <span class="result-value" id="bestMessage" style="font-size: 12px;"></span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <!-- здесь должна быть таблица разностей для интерполяции | x | y | Δy, Δ^2 y, Δ... -->
                     </div>
                 </div>
             </div>

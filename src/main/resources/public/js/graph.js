@@ -24,6 +24,20 @@ export function renderChart(points, results) {
         order: 2
     });
 
+    let yLimitMin = -100;
+    let yLimitMax = 100;
+
+    if (points.length > 0) {
+        const yVals = points.map(p => p.y);
+        const minY = Math.min(...yVals);
+        const maxY = Math.max(...yVals);
+        const ySpread = maxY - minY;
+        
+        // Порог: 100, либо 5-кратный разброс данных, если сами данные большие
+        const threshold = Math.max(100, ySpread * 5); 
+        yLimitMin = minY - threshold;
+        yLimitMax = maxY + threshold;
+    }
 
     if (results && results.length > 0) {
         results.forEach((res, idx) => {
@@ -89,7 +103,7 @@ export function renderChart(points, results) {
         const xDiff = maxX - minX;
         const yDiff = maxY - minY;
         const marginX = xDiff === 0 ? 5 : xDiff * 0.2;
-        const marginY = yDiff === 0 ? 5 : yDiff * 0.2;
+        const marginY = yDiff === 0 ? 5 : yDiff * 0.5;
 
         xMin = minX - marginX;
         xMax = maxX + marginX;

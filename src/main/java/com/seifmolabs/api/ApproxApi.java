@@ -58,9 +58,16 @@ public class ApproxApi {
             points.sort(Comparator.comparingDouble(p -> p.x));
 
             double targetX = req.targetX != null ? req.targetX : points.get(0).x;
-            
-            boolean isEquidistant = service.isEquidistant(points);
-            double[][] diffTable = isEquidistant ? service.finiteDifferences(points) : service.dividedDifferences(points);
+
+            boolean isEquidistant = service.isEquidistant(points, points.size());
+
+            double[][] diffTable = null;
+
+            if (isEquidistant) {
+                diffTable = service.finiteDifferences(points, points.size());
+            } else {
+                diffTable = service.dividedDifferences(points, points.size());
+            }
 
             List<Map<String, Object>> results = new ArrayList<>();
 
@@ -78,37 +85,37 @@ public class ApproxApi {
             }
 
             // 1. Лагранж
-            results.add(buildMethodResult("Многочлен Лагранжа", service.lagrange(points, targetX), points, x -> service.lagrange(points, x)));
+            results.add(buildMethodResult("Многочлен Лагранжа", service.lagrange(points, points.size(), targetX), points, x -> service.lagrange(points, points.size(), x)));
 
             // 2. Ньютон разд разности
-            double[][] divDiff = service.dividedDifferences(points);
+            double[][] divDiff = service.dividedDifferences(points, points.size());
             double midX = (points.get(0).x + points.get(points.size() - 1).x) / 2.0;
 
            if (targetX <= midX) {
                 results.add(buildMethodResult("Ньютон (раздел. разности, I)", 
-                    service.newtonDivided(points, divDiff, targetX), 
+                    service.newtonDivided(points, points.size(), divDiff, targetX), 
                     points, 
-                    x -> service.newtonDivided(points, divDiff, x)));
+                    x -> service.newtonDivided(points, points.size(), divDiff, x)));
             } else {
                 results.add(buildMethodResult("Ньютон (раздел. разности, II)", 
-                    service.newtonDividedBackward(points, divDiff, targetX), 
+                    service.newtonDividedBackward(points, points.size(), divDiff, targetX), 
                     points, 
-                    x -> service.newtonDividedBackward(points, divDiff, x)));
+                    x -> service.newtonDividedBackward(points, points.size(), divDiff, x)));
             }
 
             if (isEquidistant) {
-                double[][] finDiff = service.finiteDifferences(points);
+                double[][] finDiff = service.finiteDifferences(points, points.size());
                 
                 if (targetX <= midX) {
                     results.add(buildMethodResult("Ньютон (конечные разн., I)", 
-                        service.newtonFiniteForward(points, finDiff, targetX), 
+                        service.newtonFiniteForward(points, points.size(), finDiff, targetX), 
                         points, 
-                        x -> service.newtonFiniteForward(points, finDiff, x)));
+                        x -> service.newtonFiniteForward(points, points.size(), finDiff, x)));
                 } else {
                     results.add(buildMethodResult("Ньютон (конечные разн., II)", 
-                        service.newtonFiniteBackward(points, finDiff, targetX), 
+                        service.newtonFiniteBackward(points, points.size(), finDiff, targetX), 
                         points, 
-                        x -> service.newtonFiniteBackward(points, finDiff, x)));
+                        x -> service.newtonFiniteBackward(points, points.size(), finDiff, x)));
                 }
             }
 

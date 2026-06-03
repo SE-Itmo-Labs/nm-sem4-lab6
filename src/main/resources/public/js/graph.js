@@ -24,21 +24,6 @@ export function renderChart(points, results) {
         order: 2
     });
 
-    let yLimitMin = -100;
-    let yLimitMax = 100;
-
-    if (points.length > 0) {
-        const yVals = points.map(p => p.y);
-        const minY = Math.min(...yVals);
-        const maxY = Math.max(...yVals);
-        const ySpread = maxY - minY;
-        
-        // Порог: 100, либо 5-кратный разброс данных, если сами данные большие
-        const threshold = Math.max(100, ySpread * 5); 
-        yLimitMin = minY - threshold;
-        yLimitMax = maxY + threshold;
-    }
-
     if (results && results.length > 0) {
         results.forEach((res, idx) => {
 
@@ -103,7 +88,7 @@ export function renderChart(points, results) {
         const xDiff = maxX - minX;
         const yDiff = maxY - minY;
         const marginX = xDiff === 0 ? 5 : xDiff * 0.2;
-        const marginY = yDiff === 0 ? 5 : yDiff * 0.5;
+        const marginY = yDiff === 0 ? 5 : yDiff * 0.2;
 
         xMin = minX - marginX;
         xMax = maxX + marginX;
@@ -146,17 +131,19 @@ export function renderChart(points, results) {
                 tooltip: { enabled: true },
                 zoom: {
                     zoom: {
-                        wheel: { enabled: true },      // Зум колесом мыши
-                        pinch: { enabled: true },      // Зум щипком на тачскринах
-                        mode: 'xy',                    // Масштабирование по обеим осям
+                        wheel: { enabled: true }, 
+                        pinch: { enabled: true },     
+                        mode: 'xy',                   
                     },
                     pan: {
-                        enabled: true,                 // Включить перемещение
-                        mode: 'xy',                    // Перемещение по X и Y
+                        enabled: true,                
+                        mode: 'xy',   
                     },
                     limits: {
-                        x: { minRange: 0.5 },          // Не даем зумить "в бесконечность"
-                        y: { minRange: 0.5 }
+                        // x: { minRange: 0.5 , min: xMin, max: xMax}, // тут убрать min max, чтобы масштаб произвольный был      
+                        // y: { min: yMin, max: yMax, minRange: 0.5 } 
+                        x: { minRange: 0.5}, // тут убрать min max, чтобы масштаб произвольный был      
+                        y: { minRange: 0.5 } 
                     }
                 }
             },
@@ -164,7 +151,7 @@ export function renderChart(points, results) {
                 x: {
                     type: 'linear',
                     position: 'bottom',
-                    suggestedMin: xMin, // Используем suggestedMin вместо min, чтобы не ломать автоматический зум
+                    suggestedMin: xMin,
                     suggestedMax: xMax,
                     grid: { display: true, color: '#e0e0e0' },
                     title: { display: true, text: 'X' }

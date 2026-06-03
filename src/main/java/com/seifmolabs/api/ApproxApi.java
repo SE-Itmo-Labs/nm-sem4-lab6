@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seifmolabs.exceptions.ValidationException;
@@ -64,7 +65,9 @@ public class ApproxApi {
             List<Map<String, Object>> results = new ArrayList<>();
 
             if (req.funcType != null) {
-                java.util.function.Function<Double, Double> origFunc = null;
+
+                Function<Double, Double> origFunc = null;
+
                 if (req.funcType == 1) origFunc = Math::cos;
                 else if (req.funcType == 2) origFunc = x -> Math.pow(x, 3) - 4 * Math.pow(x, 2) + 6 * x - 2.1;
                 else if (req.funcType == 3) origFunc = x -> 0.5 * Math.exp(x);
@@ -146,7 +149,7 @@ public class ApproxApi {
         public Integer count;
     }
 
-    private static Map<String, Object> buildMethodResult(String name, double targetValue, List<Point2D> points, java.util.function.Function<Double, Double> func) {
+    private static Map<String, Object> buildMethodResult(String name, double targetValue, List<Point2D> points, Function<Double, Double> func) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("targetValue", targetValue);
@@ -158,15 +161,19 @@ public class ApproxApi {
 
         double span = maxX - minX;
         if (span == 0) span = 1.0;
-        
+
         double padding = span * 0.05;
         double plotStart = minX - padding;
         double plotEnd = maxX + padding;
         
 
-        double step = (plotEnd - plotStart) / 150.0; 
+        // double step = (plotEnd - plotStart) / 150.0; 
+        double step = (plotEnd - plotStart) / ((points.size() + 1) * 100); 
+
         for (double x = plotStart; x <= plotEnd; x += step) {
+
             double y = func.apply(x);
+            
             if (Double.isFinite(y)) {
                 plotData.add(new Point2D(x, y));
             }

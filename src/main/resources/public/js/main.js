@@ -135,10 +135,10 @@ function initPirateVideo() {
   const video = document.getElementById('pirateVideo');
   if (!video) return;
   video.addEventListener('mouseenter', () => { 
-    video.playbackRate = 4.0; 
+    video.playbackRate = 8.0; 
   });
   video.addEventListener('mouseleave', () => { 
-    video.playbackRate = 1.0;
+    video.playbackRate = 4.0;
   });
 }
 

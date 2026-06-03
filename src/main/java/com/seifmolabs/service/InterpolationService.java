@@ -10,7 +10,7 @@ public class InterpolationService {
     public boolean isEquidistant(List<Point2D> points, int n) {
         if (n < 2) return false;
         double h = points.get(1).x - points.get(0).x;
-        for (int i = 1; i < points.size(); i++) {
+        for (int i = 1; i < n; i++) {
             if (Math.abs((points.get(i).x - points.get(i - 1).x) - h) > 1e-5) {
                 return false;
             }
@@ -59,7 +59,7 @@ public class InterpolationService {
         return diff;
     }
 
-    // 2. Ньютон с разделенными разностями
+    // 2. Ньютон I с разделенными разностями
     public double newtonDivided(List<Point2D> points, int n, double[][] diff, double targetX) {
         double result = diff[0][0];
         double product = 1.0;
@@ -69,18 +69,18 @@ public class InterpolationService {
         }
         return result;
     }
-
+    // ньют II разделенн р
     public double newtonDividedBackward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double result = diff[n - 1][0];
         double product = 1.0;
-        for (int j = 1; j < n; j++) {
-            product *= (targetX - points.get(n - j).x);
-            result += diff[n - 1 - j][j] * product;
+        for (int i = 1; i < n; i++) {
+            product *= (targetX - points.get(n - i).x);
+            result += diff[n - 1 - i][i] * product;
         }
         return result;
     }
 
-    // 3. Ньютон с конечными разностями (1-я формула - вперед)
+    // 3. Ньютон с конечными разностями I
     public double newtonFiniteForward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double h = points.get(1).x - points.get(0).x;
         double t = (targetX - points.get(0).x) / h;
@@ -97,7 +97,7 @@ public class InterpolationService {
         return result;
     }
 
-    // 4. Ньютон с конечными разностями (2-я формула - назад)
+    // 4. Ньютон с конечными разностями II
     public double newtonFiniteBackward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double h = points.get(1).x - points.get(0).x;
         double t = (targetX - points.get(n - 1).x) / h;

@@ -1,58 +1,71 @@
-export function downloadReport(allPoints, allResults) {
+export function downloadReport(allPoints, allResults, diffTable, isEquidistant, targetX) {
+    if (!allPoints.length || !allResults.length)
+        return alert("Сначала выполните расчет!");
 
-  if (!allPoints.length || !allResults.length)
-    return alert("Сначала выполните расчет!");
+    const targetXStr = (targetX !== undefined && targetX !== null) ? targetX.toFixed(4) : 'не задана';
 
-  const now = new Date().toLocaleString("ru-RU");
+    let report = `
 
-  let report = `========================================\nОТЧЕТ ПО ЛАБОРАТОРНОЙ РАБОТЕ №4\nАппроксимация функций методом наименьших квадратов\nДата: ${now}\n========================================\n\n`;
-  
-  
-  
-  report += `[ИСХОДНЫЕ ДАННЫЕ]\nКоличество точек: ${allPoints.length}\n${"X".padEnd(12)} ${"Y".padEnd(12)}\n`;
-  
-  
-  allPoints.forEach(
-    (p) =>
-      (report += `${p.x.toFixed(4).padEnd(12)} ${p.y.toFixed(4).padEnd(12)}\n`),
-  );
+[ИСХОДНЫЕ ДАННЫЕ]
+Количество точек: ${allPoints.length}
+X*: ${targetXStr}
 
+${"X".padEnd(15)} ${"Y".padEnd(15)}
+`;
 
-  report += `\n[РЕЗУЛЬТАТЫ АППРОКСИМАЦИИ]\n`;
-  
-  
-  allResults.forEach((res) => {
-    report += `--------------------------------------------------\nФункция: ${res.name}\nФормула: ${res.formula}\nКоэффициенты:\n`;
-    
-    
-    for (const [key, val] of Object.entries(res.params))
-      report += `  ${key} = ${val.toFixed(6)}\n`;
+    allPoints.forEach(p => {
+        report += `${p.x.toFixed(6).padEnd(15)} ${p.y.toFixed(6).padEnd(15)}\n`;
+    });
 
-    report += `СКО (RMS): ${res.rms.toFixed(6)}\nR²: ${res.r2.toFixed(6)} (${res.r2Message})\n`;
-    
-    if (res.pearson !== null)
-      report += `Коэффициент Пирсона: ${res.pearson.toFixed(6)}\n`;
-    
-    report += `--------------------------------------------------\n${"xi".padEnd(12)} ${"yi".padEnd(12)} ${"φ(xi)".padEnd(12)} ${"εi".padEnd(12)}\n`;
-    
-    res.pointsData.forEach(
-      (pm) =>
-        (report += `${pm.x.toFixed(4).padEnd(12)} ${pm.y.toFixed(4).padEnd(12)} ${pm.phi.toFixed(4).padEnd(12)} ${pm.eps.toFixed(4).padEnd(12)}\n`),
-    );
-    report += `\n`;
-  });
+    if (diffTable && diffTable.length > 0) {
+        const symbol = isEquidistant ? 'Δ' : 'f';
+        report += `\n[ТАБЛИЦА РАЗНОСТЕЙ]
+Тип: ${isEquidistant ? 'Конечные разности (равноотстоящие узлы)' : 'Разделенные разности (неравноотстоящие узлы)'}
 
+`;
+        report += `${"X".padEnd(12)}${"Y".padEnd(12)}`;
+        for (let i = 1; i < allPoints.length; i++) {
+            report += `${(`${symbol}^${i}`).padEnd(12)}`;
+        }
+        report += `\n`;
 
-  const best = allResults[0];
-  
-  report += `========================================\nНАИЛУЧШЕЕ ПРИБЛИЖЕНИЕ: ${best.name}\nФормула: ${best.formula}\nСКО: ${best.rms.toFixed(6)}\nR²: ${best.r2.toFixed(6)} (${best.r2Message})\n========================================\n`;
-  
-  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
-  const link = document.createElement("a");
-  
-  link.href = URL.createObjectURL(blob);
-  link.download = `mnk_report_${Date.now()}.txt`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+        for (let i = 0; i < allPoints.length; i++) {
+            report += `${allPoints[i].x.toFixed(4).padEnd(12)}${allPoints[i].y.toFixed(4).padEnd(12)}`;
+            for (let j = 0; j < allPoints.length; j++) {
+                if (i + j < allPoints.length) {
+                    report += `${diffTable[i][j].toFixed(6).padEnd(12)}`;
+                } else {
+                    report += `${"".padEnd(12)}`;
+                }
+            }
+            report += `\n`;
+        }
+    }
+
+    report += `\n[ЗНАЧЕНИЯ ИНТЕРПОЛЯЦИОННЫХ ПОЛИНОМОВ В ТОЧКЕ X* = ${targetXStr}]
+`;
+
+    allResults.forEach(res => {
+        report += `--------------------------------------------------
+Метод: ${res.name}
+Значение P(X*): ${res.targetValue.toFixed(8)}
+`;
+        if (res.plotData && res.plotData.length > 0) {
+            const xs = res.plotData.map(p => p.x);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            report += `Диапазон построения графика: [${minX.toFixed(4)}, ${maxX.toFixed(4)}]
+Количество точек на графике: ${res.plotData.length}
+`;
+        }
+        report += `--------------------------------------------------\n`;
+    });
+
+    const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `interpolation_report_${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }

@@ -5,7 +5,7 @@ import { initModal } from './modal.js';
 import { downloadReport } from './report.js';
 import { initFileHandlers } from './fileHandlers.js';
 
-const state = { points: [], results: [], funcType: null };
+const state = { points: [], results: [], funcType: null, diffTable: null, isEquidistant: false, targetX: 0 };
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -76,12 +76,17 @@ async function doCalculate() {
   try {
     
     const targetX = parseFloat(document.getElementById('targetXInput').value) || 0;
+    
 
     const res = await fetchCalculate(state.points, targetX, state.funcType);
 
     if (res.error) return showStatus(`Ошибка сервера: ${res.error}`, 'error');
     
     state.results = res.results;
+
+    state.diffTable = res.diffTable;
+    state.isEquidistant = res.isEquidistant;
+    state.targetX = targetX;    
     
     if(res.warning) {
         showStatus(res.warning, 'warning');
@@ -127,7 +132,15 @@ function initGenerateButton() {
 }
 
 function initExportButton() {
-  document.getElementById('exportBtn')?.addEventListener('click', () => downloadReport(state.points, state.results));
+      document.getElementById('exportBtn')?.addEventListener('click', () => 
+        downloadReport(
+          state.points, 
+          state.results, 
+          state.diffTable, 
+          state.isEquidistant, 
+          state.targetX
+        )
+    );
 }
 
 function initPirateVideo() {

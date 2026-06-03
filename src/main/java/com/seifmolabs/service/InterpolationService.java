@@ -18,7 +18,7 @@ public class InterpolationService {
         return true;
     }
 
-    // 1. Многочлен Лагранжа
+    // Многочлен Лагранжа
     public double lagrange(List<Point2D> points, int n, double x) {
         double result = 0.0;
         for (int i = 0; i < n; i++) {
@@ -59,7 +59,7 @@ public class InterpolationService {
         return diff;
     }
 
-    // 2. Ньютон I с разделенными разностями
+    // Ньютон I с разделенными разностями
     public double newtonDivided(List<Point2D> points, int n, double[][] diff, double targetX) {
         double result = diff[0][0];
         double product = 1.0;
@@ -69,7 +69,7 @@ public class InterpolationService {
         }
         return result;
     }
-    // ньют II разделенн р
+    // Ньютон II с разделенными разностями
     public double newtonDividedBackward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double result = diff[n - 1][0];
         double product = 1.0;
@@ -80,7 +80,7 @@ public class InterpolationService {
         return result;
     }
 
-    // 3. Ньютон с конечными разностями I
+    // Ньютон I с конечными разностями
     public double newtonFiniteForward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double h = points.get(1).x - points.get(0).x;
         double t = (targetX - points.get(0).x) / h;
@@ -97,7 +97,7 @@ public class InterpolationService {
         return result;
     }
 
-    // 4. Ньютон с конечными разностями II
+    // Ньютон II с конечными разностями
     public double newtonFiniteBackward(List<Point2D> points, int n, double[][] diff, double targetX) {
         double h = points.get(1).x - points.get(0).x;
         double t = (targetX - points.get(n - 1).x) / h;

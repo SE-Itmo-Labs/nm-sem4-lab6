@@ -74,6 +74,17 @@ public class InterpolationService {
         return result;
     }
 
+    public double newtonDividedBackward(List<Point2D> points, double[][] diff, double targetX) {
+        int n = points.size();
+        double result = diff[n - 1][0];
+        double product = 1.0;
+        for (int j = 1; j < n; j++) {
+            product *= (targetX - points.get(n - j).x);
+            result += diff[n - 1 - j][j] * product;
+        }
+        return result;
+    }
+
     // 3. Ньютон с конечными разностями (1-я формула - вперед)
     public double newtonFiniteForward(List<Point2D> points, double[][] diff, double targetX) {
         int n = points.size();

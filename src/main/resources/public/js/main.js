@@ -9,7 +9,6 @@ const state = { points: [], results: [], funcType: null };
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  initModal(() => state.results);
   initFileHandlers();
   initForm();
   initGenerateButton();
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.onGraphUpdate = async (newPoints) => {
-
   state.points = newPoints;
   state.funcType = null; 
   syncInputWithPoints();
@@ -33,7 +31,7 @@ window.onGraphUpdate = async (newPoints) => {
     state.results = [];
     displayResults([]);
     renderChart(state.points, []);
-    if (state.points.length > 0) showStatus(`Точек: ${state.points.length}. Нужно от 2 до 100`, 'warning');
+    document.getElementById('diffTablePanel').style.display = 'none';
   }
 };
 
@@ -137,10 +135,10 @@ function initPirateVideo() {
   const video = document.getElementById('pirateVideo');
   if (!video) return;
   video.addEventListener('mouseenter', () => { 
-    video.playbackRate = 4.0; video.play().catch(()=>{}); 
+    video.playbackRate = 4.0; 
   });
   video.addEventListener('mouseleave', () => { 
-    video.playbackRate = 1.0; video.pause(); video.currentTime = 0; 
+    video.playbackRate = 1.0;
   });
 }
 
@@ -183,12 +181,16 @@ function initFuncGenerator() {
 function renderDiffTable(points, diffTable, isEquidistant) {
     const head = document.getElementById('diffTableHead');
     const body = document.getElementById('diffTableBody');
-    if(!head || !body) return;
+    const panel = document.getElementById('diffTablePanel');
+    if(!head || !body || !panel) return;
 
-    let headHtml = `<th>X</th><th>Y</th>`;
+    let headHtml = `<th> X </th><th> Y </th>`;
+
     const symbol = isEquidistant ? 'Δ' : 'f';
+
     for(let i = 1; i < points.length; i++) {
-        headHtml += `<th>${symbol}^${i}</th>`;
+
+        headHtml += `<th> ${symbol}^${i} </th>`;
     }
     head.innerHTML = headHtml;
 
@@ -205,4 +207,5 @@ function renderDiffTable(points, diffTable, isEquidistant) {
         bodyHtml += `</tr>`;
     }
     body.innerHTML = bodyHtml;
+    panel.style.display = 'block';
 }

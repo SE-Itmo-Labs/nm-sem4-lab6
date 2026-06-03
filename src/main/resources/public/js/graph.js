@@ -59,8 +59,8 @@ export function renderChart(points, results) {
 
             cb.addEventListener('change', (e) => {
                 const i = parseInt(e.target.dataset.datasetIndex);
-                if (chartInstance?.data?.datasets[i]) {
-                    chartInstance.data.datasets[i].hidden = !e.target.checked;
+                if (chartInstance) {
+                    chartInstance.setDatasetVisibility(i, e.target.checked);
                     chartInstance.update();
                 }
             });

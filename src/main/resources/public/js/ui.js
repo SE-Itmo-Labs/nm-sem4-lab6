@@ -7,7 +7,7 @@ export function showStatus(msg, type) {
 }
 
 export function displayResults(results) {
-  const panel = document.getElementById('bestResultPanel');
+  const panel = document.getElementById('interpolationResults');
   if (!panel) return;
   
   if (results.length === 0) {
@@ -15,26 +15,26 @@ export function displayResults(results) {
     return;
   }
 
-  let html = `<h3 style="color:var(--retro-primary);">Результаты в точке X*</h3>`;
+  let html = `<h3 style="color:var(--retro-primary); margin-top:0; border-bottom:2px solid var(--retro-primary);">Значения в точке X*</h3>`;
+  
+  const origRes = results.find(r => r.name === 'Исходная функция');
+  const exactValue = origRes ? origRes.targetValue : null;
+
   results.forEach(res => {
+      let errorHtml = '';
+      if (exactValue !== null && res.name !== 'Исходная функция') {
+          const err = Math.abs(exactValue - res.targetValue);
+          errorHtml = `<br><small style="color:#666;">Погрешность: ${err.toExponential(4)}</small>`;
+      }
+      
       html += `
-        <div class="result-item" style="margin-bottom: 5px;">
-            <span class="result-label">${res.name}</span>
-            <span class="result-value">P(X*) = ${res.targetValue.toFixed(6)}</span>
+        <div class="result-item" style="margin-bottom: 8px;">
+            <span class="result-label" style="font-size: 13px;">${res.name}</span>
+            <span class="result-value">P(X*) = ${res.targetValue.toFixed(6)}${errorHtml}</span>
         </div>
       `;
   });
   
   panel.innerHTML = html;
-  panel.style.display = 'block';
-}
-
-function updateBestResultPanel(best) {
-  const panel = document.getElementById('bestResultPanel');
-  if (!panel) return;
-  document.getElementById('bestFormula').textContent = best.formula;
-  document.getElementById('bestRms').textContent = best.rms.toFixed(4);
-  document.getElementById('bestR2').textContent = best.r2.toFixed(4);
-  document.getElementById('bestMessage').textContent = best.r2Message;
   panel.style.display = 'block';
 }

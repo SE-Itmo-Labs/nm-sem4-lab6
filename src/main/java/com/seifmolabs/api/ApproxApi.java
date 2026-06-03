@@ -79,17 +79,17 @@ public class ApproxApi {
 
             // 2. Ньютон разд разности
             double[][] divDiff = service.dividedDifferences(points);
-            results.add(buildMethodResult("Ньютон (разделенные разности)", service.newtonDivided(points, divDiff, targetX), points, x -> service.newtonDivided(points, divDiff, x)));
-
+            results.add(buildMethodResult("Ньютон (раздел. разности, I)", service.newtonDivided(points, divDiff, targetX), points, x -> service.newtonDivided(points, divDiff, x)));
+            results.add(buildMethodResult("Ньютон (раздел. разности, II)", service.newtonDividedBackward(points, divDiff, targetX), points, x -> service.newtonDividedBackward(points, divDiff, x)));
             // 3. Ньютон конечные разн
             if (isEquidistant) {
                 double[][] finDiff = service.finiteDifferences(points);
                 // Если X ближе к началу - 1я формула, если к концу - 2я
                 double midX = (points.get(0).x + points.get(points.size() - 1).x) / 2.0;
                 if (targetX <= midX) {
-                    results.add(buildMethodResult("Ньютон (конечные разн., 1-я форма - вперед)", service.newtonFiniteForward(points, finDiff, targetX), points, x -> service.newtonFiniteForward(points, finDiff, x)));
+                    results.add(buildMethodResult("Ньютон (конечные разн., I)", service.newtonFiniteForward(points, finDiff, targetX), points, x -> service.newtonFiniteForward(points, finDiff, x)));
                 } else {
-                    results.add(buildMethodResult("Ньютон (конечные разн., 2-я форма - назад)", service.newtonFiniteBackward(points, finDiff, targetX), points, x -> service.newtonFiniteBackward(points, finDiff, x)));
+                    results.add(buildMethodResult("Ньютон (конечные разн., II)", service.newtonFiniteBackward(points, finDiff, targetX), points, x -> service.newtonFiniteBackward(points, finDiff, x)));
                 }
             }
 
@@ -157,8 +157,9 @@ public class ApproxApi {
         
 
         double span = maxX - minX;
-        if (span == 0) span = 1.0; 
-        double padding = span * 0.15;
+        if (span == 0) span = 1.0;
+        
+        double padding = span * 0.05;
         double plotStart = minX - padding;
         double plotEnd = maxX + padding;
         

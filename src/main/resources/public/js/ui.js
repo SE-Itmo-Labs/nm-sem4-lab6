@@ -3,38 +3,37 @@ export function showStatus(msg, type) {
   if (!el) return;
   el.textContent = msg;
   el.className = `status-message show ${type}`;
-  setTimeout(() => el.classList.remove('show'), 5000);
+  setTimeout(() => el.classList.remove('show'), 6000);
 }
 
-export function displayResults(results) {
-  const panel = document.getElementById('interpolationResults');
+// Панель с погрешностями / ошибками каждого метода
+export function displayAccuracy(methods) {
+  const panel = document.getElementById('accuracyResults');
   if (!panel) return;
-  
-  if (results.length === 0) {
+
+  if (!methods || methods.length === 0) {
     panel.style.display = 'none';
     return;
   }
 
-  let html = `<h3 style="color:var(--retro-primary); margin-top:0; border-bottom:2px solid var(--retro-primary);">Значения в точке X*</h3>`;
-  
-  const origRes = results.find(r => r.name === 'Исходная функция');
-  const exactValue = origRes ? origRes.targetValue : null;
+  let html = `<h3 style="color:var(--retro-primary); margin-top:0; border-bottom:2px solid var(--retro-primary);">Оценка погрешности</h3>`;
 
-  results.forEach(res => {
-      let errorHtml = '';
-      if (exactValue !== null && res.name !== 'Исходная функция') {
-          const err = Math.abs(exactValue - res.targetValue);
-          errorHtml = `<br><small style="color:#666;">Погрешность: ${err.toExponential(4)}</small>`;
-      }
-      
+  methods.forEach(m => {
+    if (m.error) {
+      html += `
+        <div class="result-item" style="margin-bottom: 8px; border-color:#aa0000;">
+            <span class="result-label" style="font-size: 13px;">${m.name}</span>
+            <span class="result-value" style="color:#aa0000; font-size:13px;">⚠ ${m.error}</span>
+        </div>`;
+    } else {
       html += `
         <div class="result-item" style="margin-bottom: 8px;">
-            <span class="result-label" style="font-size: 13px;">${res.name}</span>
-            <span class="result-value">P(X*) = ${res.targetValue.toFixed(6)}${errorHtml}</span>
-        </div>
-      `;
+            <span class="result-label" style="font-size: 13px;">${m.name}</span>
+            <span class="result-value">${m.accuracyLabel} = ${m.accuracy.toExponential(4)}</span>
+        </div>`;
+    }
   });
-  
+
   panel.innerHTML = html;
   panel.style.display = 'block';
 }

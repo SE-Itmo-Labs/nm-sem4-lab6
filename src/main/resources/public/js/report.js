@@ -1,71 +1,52 @@
-export function downloadReport(allPoints, allResults, diffTable, isEquidistant, targetX) {
-    if (!allPoints.length || !allResults.length)
-        return alert("Сначала выполните расчет!");
+const EQ_LABELS = { 1: "y' = x + y", 2: "y' = y - x", 3: "y' = -2xy" };
 
-    const targetXStr = (targetX !== undefined && targetX !== null) ? targetX.toFixed(4) : 'не задана';
+export function downloadReport(state) {
+  const d = state.data;
+  if (!d) return alert('Сначала выполните расчет!');
 
-    let report = `
+  let report = `[ЧИСЛЕННОЕ РЕШЕНИЕ ОДУ - ОТЧЁТ]
 
-[ИСХОДНЫЕ ДАННЫЕ]
-Количество точек: ${allPoints.length}
-X*: ${targetXStr}
+Уравнение:     ${EQ_LABELS[state.equation]}
+Нач. условие:  y(${state.x0}) = ${state.y0}
+Интервал:      [${state.x0}, ${state.xn}]
+Шаг h:         ${state.h}
+Точность eps:  ${state.eps}
 
-${"X".padEnd(15)} ${"Y".padEnd(15)}
+[ОЦЕНКА ПОГРЕШНОСТИ]
 `;
 
-    allPoints.forEach(p => {
-        report += `${p.x.toFixed(6).padEnd(15)} ${p.y.toFixed(6).padEnd(15)}\n`;
-    });
-
-    if (diffTable && diffTable.length > 0) {
-        const symbol = isEquidistant ? 'Δ' : 'f';
-        report += `\n[ТАБЛИЦА РАЗНОСТЕЙ]
-Тип: ${isEquidistant ? 'Конечные разности (равноотстоящие узлы)' : 'Разделенные разности (неравноотстоящие узлы)'}
-
-`;
-        report += `${"X".padEnd(12)}${"Y".padEnd(12)}`;
-        for (let i = 1; i < allPoints.length; i++) {
-            report += `${(`${symbol}^${i}`).padEnd(12)}`;
-        }
-        report += `\n`;
-
-        for (let i = 0; i < allPoints.length; i++) {
-            report += `${allPoints[i].x.toFixed(4).padEnd(12)}${allPoints[i].y.toFixed(4).padEnd(12)}`;
-            for (let j = 0; j < allPoints.length; j++) {
-                if (i + j < allPoints.length) {
-                    report += `${diffTable[i][j].toFixed(6).padEnd(12)}`;
-                } else {
-                    report += `${"".padEnd(12)}`;
-                }
-            }
-            report += `\n`;
-        }
+  d.methods.forEach(m => {
+    if (m.error) {
+      report += `${m.name}: ОШИБКА - ${m.error}\n`;
+    } else {
+      report += `${m.name}: ${m.accuracyLabel} = ${m.accuracy.toExponential(6)}\n`;
     }
+  });
 
-    report += `\n[ЗНАЧЕНИЯ ИНТЕРПОЛЯЦИОННЫХ ПОЛИНОМОВ В ТОЧКЕ X* = ${targetXStr}]
-`;
+  const okMethods = d.methods.filter(m => !m.error && m.points && m.points.length > 0);
 
-    allResults.forEach(res => {
-        report += `--------------------------------------------------
-Метод: ${res.name}
-Значение P(X*): ${res.targetValue.toFixed(8)}
-`;
-        if (res.plotData && res.plotData.length > 0) {
-            const xs = res.plotData.map(p => p.x);
-            const minX = Math.min(...xs);
-            const maxX = Math.max(...xs);
-            report += `Диапазон построения графика: [${minX.toFixed(4)}, ${maxX.toFixed(4)}]
-Количество точек на графике: ${res.plotData.length}
-`;
-        }
-        report += `--------------------------------------------------\n`;
-    });
+  if (d.nodes && d.nodes.length > 0 && okMethods.length > 0) {
+    report += `\n[ТАБЛИЦА ПРИБЛИЖЁННЫХ ЗНАЧЕНИЙ]\n\n`;
+    report += `${"i".padEnd(5)}${"x".padEnd(12)}${"y точное".padEnd(15)}`;
+    okMethods.forEach(m => { report += `${m.name.padEnd(22)}`; });
+    report += `\n`;
 
-    const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `interpolation_report_${Date.now()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    for (let i = 0; i < d.nodes.length; i++) {
+      report += `${String(i).padEnd(5)}${d.nodes[i].toFixed(4).padEnd(12)}${d.exactNodes[i].toFixed(6).padEnd(15)}`;
+      okMethods.forEach(m => {
+        const pt = m.points[i];
+        const val = pt ? pt.y.toFixed(6) : '-';
+        report += `${val.padEnd(22)}`;
+      });
+      report += `\n`;
+    }
+  }
+
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `ode_report_${Date.now()}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

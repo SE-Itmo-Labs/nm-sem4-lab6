@@ -2,20 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Лабораторная 4. Аппроксимация</title>
+    <title>Лабораторная 6. ОДУ</title>
     <link rel="stylesheet" href="/css/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
-
 </head>
 <body>
     <div class="container">
         <div class="header-flex">
             <div class="header-text">
-                <h1>Аппроксимация функций</h1>
-                <h2>Лабораторная работа №5</h2>
+                <h1>Численное решение ОДУ</h1>
+                <h2>Лабораторная работа №6</h2>
             </div>
             <div class="header-img">
                 <video id="pirateVideo" class="header-video" muted playsinline loop autoplay>
@@ -25,7 +24,7 @@
         </div>
 
         <div class="marquee-container">
-            <marquee scrollamount="5">*** ДОБРО ПОЖАЛОВАТЬ В 5 ЛАБУ ПО ВЫЧМАТУ!!! УРА ИНТЕРПОЛЯЦИЯМ!!! ***</marquee>
+            <marquee scrollamount="5">*** ДОБРО ПОЖАЛОВАТЬ В 6 ЛАБУ ПО ВЫЧМАТУ!!! УРА ЗАДАЧЕ КОШИ!!! ***</marquee>
         </div>
 
         <div class="main-layout">
@@ -34,77 +33,51 @@
                 <div class="retro-form">
                     <h3 style="margin-top:0; color:var(--retro-primary);">Входные данные</h3>
                     <form id="dataForm">
+
                         <div class="form-group">
-                            <label for="pointsInput">Точки (8-12):</label>
-
-                            <textarea id="pointsInput" class="retro-input" rows="12" placeholder="X Y&#10;0.0 0.0&#10;0.4 2.962..."></textarea>
-                            <!-- <div class="form-group" style="margin-top: 12px; border-top: 1px dashed #808080; padding-top: 10px;"> -->
-                                
-                                <!-- ЗДЕСЬ БУДЕТ ФОРМА ТАКОГО ВИДА: ВЫБОР, ГЕНЕРИРОВАТЬ ЛИ ИНТЕРПОЛЯЦИЮ ПО ФУНКЦИИ (f(x) = cos(x; f(x) = x^3 - 4x^2 + 6x - 2.1; f(x) = 0.5*e^x)) ; ЛИБО МЫ ДЕЛАЕМ  -->
-                                <!--В ФОРМЕ ПО ГЕНЕРАЦИИ - начало (a) : int от -1000 до 1000; конец (b) : от -1000 до 1000. Проверка на b<a в бекенде ; количество точек (от 1 до 15).-->
-                                <!-- Также ниже должно быть поле : найти значение в точке X*: ... -->
-                                 <!-- Также если юзер решит посчитать экстраполяцию (не интерполяцию), то должно об этом выводиться сообщение со словами (Произошла экстраполяция функции, значения могут быть неточными) -->
-                                
-                                 <!-- <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
-                                <div class="form-actions" style="margin-top: 8px;">
-                                    <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
-                                    <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
-                                    <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
-                                </div>
-                            </div> -->
-
-                            <label style="color: #000080; font-weight: bold;">Способ ввода:</label>
-                            <div style="margin-bottom: 10px;">
-                                <input type="radio" id="modeManual" name="inputMode" value="manual" checked>
-                                <label for="modeManual" style="display:inline; font-weight:normal;">Таблица / Файл</label>
-                                <input type="radio" id="modeFunc" name="inputMode" value="function" style="margin-left:10px;">
-                                <label for="modeFunc" style="display:inline; font-weight:normal;">По функции</label>
-                            </div>
-
-                            <!-- Блок генерации по функции -->
-                            <div id="funcGenBlock" style="display: none; background: #f0f0f0; padding: 10px; border: 1px inset #808080; margin-bottom: 10px;">
-                                <label>Выберите функцию:</label>
-                                <select id="funcSelect" class="retro-select" style="margin-bottom: 10px;">
-                                    <option value="1">f(x) = cos(x)</option>
-                                    <option value="2">f(x) = x³ - 4x² + 6x - 2.1</option>
-                                    <option value="3">f(x) = 0.5 * e^x</option>
-                                </select>
-                                
-                                <div class="input-row" style="margin-bottom: 10px;">
-                                    <div>
-                                        <label>Начало (a):</label>
-                                        <input type="number" id="funcA" class="retro-input" value="-5" min="-1000" max="1000" step="0.1">
-                                    </div>
-                                    <div>
-                                        <label>Конец (b):</label>
-                                        <input type="number" id="funcB" class="retro-input" value="5" min="-1000" max="1000" step="0.1">
-                                    </div>
-                                    <div>
-                                        <label>Точек (N):</label>
-                                        <input type="number" id="funcN" class="retro-input" value="10" min="2" max="15">
-                                    </div>
-                                </div>
-                                <button type="button" id="genFuncBtn" class="retro-btn retro-btn-secondary" style="width:100%;">Сгенерировать точки</button>
-                            </div>
-
-                            <!-- Целевая точка X* -->
-                            <div style="margin-bottom: 10px; background: #ffffcc; padding: 10px; border: 1px inset #808080;">
-                                <label for="targetXInput" style="color: red;">Найти значение в точке X*:</label>
-                                <input type="number" id="targetXInput" class="retro-input" step="0.01" value="0.5" placeholder="Например, 1.5">
-                            </div>
-
-                            <label style="color: #000080; font-weight: bold;">Файловые операции:</label>
-                            <div class="form-actions" style="margin-top: 8px;">
-                                <input type="file" id="fileInput" accept=".txt,.csv,.dat" style="display: none;">
-                                <button type="button" id="uploadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Загрузить</button>
-                                <button type="button" id="downloadBtn" class="retro-btn retro-btn-secondary" style="flex: 1;">Сохранить</button>
-                            </div>
-                                                    
+                            <label for="equationSelect">Уравнение y' = f(x, y):</label>
+                            <select id="equationSelect" class="retro-select">
+                                <option value="1">y' = x + y</option>
+                                <option value="2">y' = y &minus; x</option>
+                                <option value="3">y' = &minus;2xy</option>
+                            </select>
                         </div>
+
+                        <div class="form-group">
+                            <label style="color: #000080; font-weight: bold;">Начальные условия:</label>
+                            <div class="input-row">
+                                <div>
+                                    <label for="x0Input">x&#8320;:</label>
+                                    <input type="text" id="x0Input" class="retro-input" value="0">
+                                </div>
+                                <div>
+                                    <label for="y0Input">y&#8320; = y(x&#8320;):</label>
+                                    <input type="text" id="y0Input" class="retro-input" value="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color: #000080; font-weight: bold;">Интервал и параметры:</label>
+                            <div class="input-row">
+                                <div>
+                                    <label for="xnInput">x&#8345; (конец):</label>
+                                    <input type="text" id="xnInput" class="retro-input" value="2">
+                                </div>
+                                <div>
+                                    <label for="hInput">Шаг h:</label>
+                                    <input type="text" id="hInput" class="retro-input" value="0.1">
+                                </div>
+                            </div>
+                            <div style="margin-top:10px; background: #ffffcc; padding: 10px; border: 1px inset #808080;">
+                                <label for="epsInput" style="color: red;">Точность &epsilon;:</label>
+                                <input type="text" id="epsInput" class="retro-input" value="0.0001">
+                            </div>
+                        </div>
+
                         <div class="form-actions">
                             <button type="submit" class="retro-btn retro-btn-primary">РАССЧИТАТЬ</button>
                             <button type="button" id="exportBtn" class="retro-btn retro-btn-secondary">Сохранить отчет</button>
-                            <!-- <button type="button" id="generateBtn" class="retro-btn retro-btn-secondary">СГЕНЕРИТЬ</button> -->
                         </div>
                         <div id="formStatus" class="status-message"></div>
                     </form>
@@ -113,49 +86,28 @@
                 <div class="retro-form">
                     <h3 style="margin-top:0; color:var(--retro-primary);">Отображать:</h3>
                     <div id="chartCheckboxes" class="graph-controls">
-                        <span style="font-size: 13px; color: #666;">Здесь появятся функции после расчета...</span>
+                        <span style="font-size: 13px; color: #666;">Здесь появятся графики после расчета...</span>
                     </div>
                 </div>
 
-                <div id="interpolationResults" class="results-panel" style="display:none;"></div>
+                <div id="accuracyResults" class="results-panel" style="display:none;"></div>
             </div>
 
             <div class="graph-panel">
-                <h2 style="margin-top: 0;">График интерполяции</h2>
-                <!-- Здесь после графика - результат интерполяции,  -->
+                <h2 style="margin-top: 0;">График решения</h2>
                 <div class="graph-box">
                     <canvas id="chartCanvas"></canvas>
                 </div>
 
-                <div id="diffTablePanel" class="results-panel" style="display:none;">
-                    <h3 style="color:var(--retro-primary); margin-top:0;">Таблица разностей</h3>
-                    <div style="overflow-x: auto;">
-                        <table class="data-table" id="diffTable">
-                            <thead><tr id="diffTableHead"></tr></thead>
-                            <tbody id="diffTableBody"></tbody>
+                <div id="solutionTablePanel" class="results-panel" style="display:none;">
+                    <h3 style="color:var(--retro-primary); margin-top:0;">Таблица приближённых значений</h3>
+                    <div style="overflow-x: auto; max-height: 400px;">
+                        <table class="data-table" id="solutionTable">
+                            <thead><tr id="solutionTableHead"></tr></thead>
+                            <tbody id="solutionTableBody"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="detailsModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h2 id="modalTitle">Детали</h2>
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>X</th>
-                            <th>Y</th>
-                            <th>Ф(x)</th>
-                            <th>ε</th>
-                        </tr>
-                    </thead>
-                    <tbody id="modalBody"></tbody>
-                </table>
             </div>
         </div>
     </div>

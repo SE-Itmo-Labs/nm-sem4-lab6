@@ -1,102 +1,74 @@
 let chartInstance = null;
 
-const LINE_COLORS = [
-    'rgba(54, 162, 235, 1)', 
-    'rgba(255, 99, 132, 1)',
-    'rgba(75, 192, 192, 1)',   
-    'rgba(153, 102, 255, 1)',
-    'rgba(255, 159, 64, 1)'
+const EXACT_COLOR = 'rgba(0, 0, 0, 0.85)';
+const METHOD_COLORS = [
+    'rgba(54, 162, 235, 1)',   // Эйлер
+    'rgba(255, 99, 132, 1)',   // Усов. Эйлер
+    'rgba(46, 184, 92, 1)'     // Милн
 ];
-export function renderChart(points, results) {
+
+// data: { exactPlot:[{x,y}], methods:[{name, error, points:[{x,y}]}] }
+export function renderChart(data) {
     const checkboxesContainer = document.getElementById('chartCheckboxes');
     checkboxesContainer.innerHTML = '';
 
     const datasets = [];
+    const allX = [];
+    const allY = [];
 
+    // 1. Точное решение (гладкая кривая)
+    if (data && data.exactPlot && data.exactPlot.length > 0) {
+        datasets.push({
+            label: 'Точное решение',
+            data: data.exactPlot.map(p => ({ x: p.x, y: p.y })),
+            showLine: true,
+            pointRadius: 0,
+            borderColor: EXACT_COLOR,
+            backgroundColor: EXACT_COLOR,
+            borderWidth: 2.5,
+            borderDash: [6, 4],
+            order: 1
+        });
+        addCheckbox(checkboxesContainer, 'Точное решение', EXACT_COLOR, datasets.length - 1, true);
+        data.exactPlot.forEach(p => { allX.push(p.x); allY.push(p.y); });
+    }
 
-    datasets.push({
-        label: 'Исходные данные',
-        data: points.map(p => ({ x: p.x, y: p.y })),
-        showLine: false,
-        pointBackgroundColor: 'red',
-        pointRadius: 6,      
-        pointHoverRadius: 9,
-        order: 2
-    });
-
-    if (results && results.length > 0) {
-        results.forEach((res, idx) => {
-
-            const isOriginal = res.name === 'Исходная функция';
-            const color = isOriginal ? 'rgba(128, 128, 128, 0.8)' : LINE_COLORS[idx % LINE_COLORS.length];
-
-            const isShownDefault = isOriginal || res.name.includes('Лагранж');
+    // 2. Каждый численный метод
+    if (data && data.methods) {
+        data.methods.forEach((m, idx) => {
+            if (m.error || !m.points || m.points.length === 0) return;
+            const color = METHOD_COLORS[idx % METHOD_COLORS.length];
 
             datasets.push({
-                label: res.name,
-                data: res.plotData.map(p => ({ x: p.x, y: p.y })),
+                label: m.name,
+                data: m.points.map(p => ({ x: p.x, y: p.y })),
                 showLine: true,
-                pointRadius: 0,
+                pointRadius: 3,
                 borderColor: color,
                 backgroundColor: color,
                 borderWidth: 2,
-                order: isOriginal ? 3 : 1, 
-                hidden: idx !== 0
+                order: 2
             });
-
-            const label = document.createElement('label');
-            label.style.marginRight = '14px';
-            label.style.cursor = 'pointer';
-            label.style.display = 'inline-flex';
-            label.style.alignItems = 'center';
-            label.style.gap = '4px';
-            label.style.fontWeight = '500';
-
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.checked = idx === 0;
-            cb.dataset.datasetIndex = datasets.length - 1; 
-
-            cb.addEventListener('change', (e) => {
-                const i = parseInt(e.target.dataset.datasetIndex);
-                if (chartInstance) {
-                    chartInstance.setDatasetVisibility(i, e.target.checked);
-                    chartInstance.update();
-                }
-            });
-
-            const span = document.createElement('span');
-            span.textContent = res.name;
-            span.style.color = color;
-
-            label.appendChild(cb);
-            label.appendChild(span);
-            checkboxesContainer.appendChild(label);
+            addCheckbox(checkboxesContainer, m.name, color, datasets.length - 1, true);
+            m.points.forEach(p => { allX.push(p.x); allY.push(p.y); });
         });
     }
 
+    if (checkboxesContainer.innerHTML === '') {
+        checkboxesContainer.innerHTML =
+            '<span style="font-size: 13px; color: #666;">Нет данных для построения...</span>';
+    }
 
-    let xMin, xMax, yMin, yMax;
-    if (points.length > 0) {
-        const xVals = points.map(p => p.x);
-        const yVals = points.map(p => p.y);
-        const minX = Math.min(...xVals);
-        const maxX = Math.max(...xVals);
-        const minY = Math.min(...yVals);
-        const maxY = Math.max(...yVals);
-
-        const xDiff = maxX - minX;
-        const yDiff = maxY - minY;
-        const marginX = xDiff === 0 ? 5 : xDiff * 0.2;
-        const marginY = yDiff === 0 ? 5 : yDiff * 0.2;
-
-        xMin = minX - marginX;
-        xMax = maxX + marginX;
-        yMin = minY - marginY;
-        yMax = maxY + marginY;
-    } else {
-        xMin = -10; xMax = 10;
-        yMin = -10; yMax = 10;
+    // Границы осей
+    let xMin = -10, xMax = 10, yMin = -10, yMax = 10;
+    if (allX.length > 0) {
+        const minX = Math.min(...allX), maxX = Math.max(...allX);
+        const minY = Math.min(...allY), maxY = Math.max(...allY);
+        const dx = maxX - minX, dy = maxY - minY;
+        const mx = dx === 0 ? 1 : dx * 0.1;
+        const my = dy === 0 ? 1 : dy * 0.1;
+        xMin = minX - mx; xMax = maxX + mx;
+        yMin = minY - my; yMax = maxY + my;
     }
 
     const ctx = document.getElementById('chartCanvas').getContext('2d');
@@ -108,43 +80,18 @@ export function renderChart(points, results) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-
-            onClick: (e, elements, chart) => {
-                if (elements.length > 0) {
-                    const pt = elements.find(el => el.datasetIndex === 0);
-                    if (pt) {
-                        points.splice(pt.index, 1);
-                        if (window.onGraphUpdate) window.onGraphUpdate(points);
-                        return;
-                    }
-                }
-                const xRaw = chart.scales.x.getValueForPixel(e.x);
-                const yRaw = chart.scales.y.getValueForPixel(e.y);
-                const x = Math.round(xRaw * 10000) / 10000;
-                const y = Math.round(yRaw * 10000) / 10000;
-                points.push({ x, y });
-                if (window.onGraphUpdate) window.onGraphUpdate(points);
-            },
             interaction: { mode: 'nearest', intersect: true },
             plugins: {
                 legend: { display: true, position: 'top' },
                 tooltip: { enabled: true },
                 zoom: {
                     zoom: {
-                        wheel: { enabled: true }, 
-                        pinch: { enabled: true },     
-                        mode: 'xy',                   
+                        wheel: { enabled: true },
+                        pinch: { enabled: true },
+                        mode: 'xy'
                     },
-                    pan: {
-                        enabled: true,                
-                        mode: 'xy',   
-                    },
-                    limits: {
-                        // x: { minRange: 0.5 , min: xMin, max: xMax}, // тут убрать min max, чтобы масштаб произвольный был      
-                        // y: { min: yMin, max: yMax, minRange: 0.5 } 
-                        x: { minRange: 0.5}, // тут убрать min max, чтобы масштаб произвольный был      
-                        y: { minRange: 0.5 } 
-                    }
+                    pan: { enabled: true, mode: 'xy' },
+                    limits: { x: { minRange: 0.1 }, y: { minRange: 0.1 } }
                 }
             },
             scales: {
@@ -165,4 +112,35 @@ export function renderChart(points, results) {
             }
         }
     });
+}
+
+function addCheckbox(container, name, color, datasetIndex, checked) {
+    const label = document.createElement('label');
+    label.style.marginRight = '14px';
+    label.style.cursor = 'pointer';
+    label.style.display = 'inline-flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '4px';
+    label.style.fontWeight = '500';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = checked;
+    cb.dataset.datasetIndex = datasetIndex;
+
+    cb.addEventListener('change', (e) => {
+        const i = parseInt(e.target.dataset.datasetIndex);
+        if (chartInstance) {
+            chartInstance.setDatasetVisibility(i, e.target.checked);
+            chartInstance.update();
+        }
+    });
+
+    const span = document.createElement('span');
+    span.textContent = name;
+    span.style.color = color;
+
+    label.appendChild(cb);
+    label.appendChild(span);
+    container.appendChild(label);
 }

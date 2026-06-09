@@ -1,224 +1,143 @@
 import { renderChart } from './graph.js';
-import { fetchCalculate } from './api.js';
-import { showStatus, displayResults } from './ui.js';
-import { initModal } from './modal.js';
+import { fetchSolve } from './api.js';
+import { showStatus, displayAccuracy } from './ui.js';
 import { downloadReport } from './report.js';
-import { initFileHandlers } from './fileHandlers.js';
 
-const state = { points: [], results: [], funcType: null, diffTable: null, isEquidistant: false, targetX: 0 };
+const state = { equation: 1, x0: 0, y0: 1, xn: 2, h: 0.1, eps: 1e-4, data: null };
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  initFileHandlers();
   initForm();
-  initGenerateButton();
   initExportButton();
   initPirateVideo();
-  renderChart(state.points, []);
-
-  initFuncGenerator();
-
+  renderChart(null);
 });
 
-window.onGraphUpdate = async (newPoints) => {
-  state.points = newPoints;
-  state.funcType = null; 
-  syncInputWithPoints();
+function parseNum(id) {
+  const raw = document.getElementById(id).value.trim().replace(',', '.');
+  if (raw === '') return NaN;
+  return Number(raw);
+}
 
-  if (state.points.length >= 2 && state.points.length <= 100) {
-    await doCalculate();
-  } else {
-    state.results = [];
-    displayResults([]);
-    renderChart(state.points, []);
-    document.getElementById('diffTablePanel').style.display = 'none';
+// Клиентская валидация (что введены числа, границы корректны, eps > 0)
+function validateInputs(v) {
+  const fields = { 'x0': v.x0, 'y0': v.y0, 'xn': v.xn, 'h': v.h, 'eps': v.eps };
+  for (const [name, val] of Object.entries(fields)) {
+    if (!Number.isFinite(val)) return `Поле «${name}» должно быть числом`;
   }
-};
+  if (v.x0 === v.xn) return 'Интервал нулевой длины: x0 не должен совпадать с xn';
+  if (v.xn < v.x0) return 'Правая граница xn должна быть больше левой x0';
+  if (v.h <= 0) return 'Шаг h должен быть больше 0';
+  if (v.h > (v.xn - v.x0)) return 'Шаг h больше длины интервала';
+  if (v.eps <= 0) return 'Точность ε должна быть больше 0';
+  return null;
+}
 
 function initForm() {
-
-  const pointsInput = document.getElementById('pointsInput');
-
-  pointsInput?.addEventListener('input', () => {
-    state.funcType = null;
-  });
-
-    document.getElementById('dataForm')?.addEventListener('submit', async (e) => {
+  document.getElementById('dataForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const lines = pointsInput.value.trim().split('\n').filter(l => l.trim());
-    const points = [];
+    const v = {
+      equation: parseInt(document.getElementById('equationSelect').value),
+      x0: parseNum('x0Input'),
+      y0: parseNum('y0Input'),
+      xn: parseNum('xnInput'),
+      h: parseNum('hInput'),
+      eps: parseNum('epsInput')
+    };
 
-    for (let i = 0; i < lines.length; i++) {
-      const parts = lines[i].trim().split(/\s+/);
-      if (parts.length !== 2) return showStatus(`Ошибка в строке ${i + 1}`, 'error');
-      const x = parseFloat(parts[0].replace(',', '.'));
-      const y = parseFloat(parts[1].replace(',', '.'));
-      if (isNaN(x) || isNaN(y)) return showStatus(`Ошибка в строке ${i + 1}: неверный формат`, 'error');
-      points.push({ x, y });
+    const err = validateInputs(v);
+    if (err) {
+      clearOutputs();
+      return showStatus(err, 'error');
     }
 
-    state.points = points;
-
-    if (state.points.length < 2 || state.points.length > 100) {
-      state.results = [];
-      displayResults([]);
-      renderChart(state.points, []);
-      return showStatus(`Требуется от 2 до 100 точек. Введено: ${state.points.length}`, 'error');
-    }
-
-    await doCalculate();
+    Object.assign(state, v);
+    await doSolve();
   });
 }
 
-async function doCalculate() {
+async function doSolve() {
   showStatus('Вычисление...', 'info');
   try {
-    
-    const targetX = parseFloat(document.getElementById('targetXInput').value) || 0;
-    
+    const res = await fetchSolve({
+      equation: state.equation,
+      x0: state.x0, y0: state.y0,
+      xn: state.xn, h: state.h, eps: state.eps
+    });
 
-    const res = await fetchCalculate(state.points, targetX, state.funcType);
-
-    if (res.error) return showStatus(`Ошибка сервера: ${res.error}`, 'error');
-    
-    state.results = res.results;
-
-    state.diffTable = res.diffTable;
-    state.isEquidistant = res.isEquidistant;
-    state.targetX = targetX;    
-    
-    if(res.warning) {
-        showStatus(res.warning, 'warning');
-        alert(res.warning);
-    } else {
-        showStatus('Расчёт завершён успешно!', 'success');
+    if (res.error) {
+      clearOutputs();
+      return showStatus(`Ошибка: ${res.error}`, 'error');
     }
 
-    renderDiffTable(state.points, res.diffTable, res.isEquidistant);
-    
-    displayResults(state.results);
-    renderChart(state.points, state.results);
+    state.data = res;
 
-  } catch (err) {
-    showStatus(`Ошибка: ${err.message}`, 'error');
+    renderChart(res);
+    displayAccuracy(res.methods);
+    renderSolutionTable(res);
+
+    const anyError = res.methods.some(m => m.error);
+    if (anyError) showStatus('Расчёт завершён (часть методов с предупреждениями)', 'warning');
+    else showStatus('Расчёт завершён успешно!', 'success');
+
+  } catch (e) {
+    clearOutputs();
+    showStatus(`Ошибка: ${e.message}`, 'error');
   }
 }
 
-function syncInputWithPoints() {
-
-  const input = document.getElementById('pointsInput');
-  if (input) input.value = state.points.map(p => `${p.x.toFixed(4)} ${p.y.toFixed(4)}`).join('\n');
-
+function clearOutputs() {
+  state.data = null;
+  renderChart(null);
+  displayAccuracy([]);
+  document.getElementById('solutionTablePanel').style.display = 'none';
 }
 
-function initGenerateButton() {
+// Таблица приближённых значений интеграла для всех методов
+function renderSolutionTable(data) {
+  const head = document.getElementById('solutionTableHead');
+  const body = document.getElementById('solutionTableBody');
+  const panel = document.getElementById('solutionTablePanel');
+  if (!head || !body || !panel) return;
 
-  const btn = document.getElementById('generateBtn');
-  if (!btn) return;
+  const okMethods = data.methods.filter(m => !m.error && m.points && m.points.length > 0);
 
-  btn.addEventListener('click', () => {
-    const n = 11, h = 0.4; let text = '';
-    for (let i = 0; i < n; i++) {
-      const x = i * h;
-      const y = (15 * x) / (Math.pow(x, 4) + 2);
-      text += `${x.toFixed(1)} ${y.toFixed(3)}\n`;
-    }
+  if (!data.nodes || data.nodes.length === 0 || okMethods.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
 
-    document.getElementById('pointsInput').value = text;
-    showStatus('Данные сгенерированы', 'info');
-  });
+  // Заголовок: i | x | y точное | <методы>
+  let headHtml = `<th>i</th><th>x&#7522;</th><th>y точное</th>`;
+  okMethods.forEach(m => { headHtml += `<th>${m.name}</th>`; });
+  head.innerHTML = headHtml;
 
+  // Тело: значение метода в узле по совпадению x
+  let bodyHtml = '';
+  for (let i = 0; i < data.nodes.length; i++) {
+    const x = data.nodes[i];
+    bodyHtml += `<tr><td>${i}</td><td>${x.toFixed(4)}</td><td>${data.exactNodes[i].toFixed(6)}</td>`;
+    okMethods.forEach(m => {
+      const pt = m.points[i];
+      const val = (pt && Math.abs(pt.x - x) < 1e-9) ? pt.y.toFixed(6) : '—';
+      bodyHtml += `<td>${val}</td>`;
+    });
+    bodyHtml += `</tr>`;
+  }
+  body.innerHTML = bodyHtml;
+  panel.style.display = 'block';
 }
 
 function initExportButton() {
-      document.getElementById('exportBtn')?.addEventListener('click', () => 
-        downloadReport(
-          state.points, 
-          state.results, 
-          state.diffTable, 
-          state.isEquidistant, 
-          state.targetX
-        )
-    );
+  document.getElementById('exportBtn')?.addEventListener('click', () => {
+    if (!state.data) return alert('Сначала выполните расчет!');
+    downloadReport(state);
+  });
 }
 
 function initPirateVideo() {
-
   const video = document.getElementById('pirateVideo');
   if (!video) return;
-  video.addEventListener('mouseenter', () => { 
-    video.playbackRate = 8.0; 
-  });
-  video.addEventListener('mouseleave', () => { 
-    video.playbackRate = 4.0;
-  });
-}
-
-function initFuncGenerator() {
-    const radioManual = document.getElementById('modeManual');
-    const radioFunc = document.getElementById('modeFunc');
-    const funcBlock = document.getElementById('funcGenBlock');
-    const inputArea = document.getElementById('pointsInput');
-
-    radioManual.addEventListener('change', () => funcBlock.style.display = 'none');
-    radioFunc.addEventListener('change', () => funcBlock.style.display = 'block');
-
-    document.getElementById('genFuncBtn').addEventListener('click', () => {
-        const a = parseFloat(document.getElementById('funcA').value);
-        const b = parseFloat(document.getElementById('funcB').value);
-        const n = parseInt(document.getElementById('funcN').value);
-        const funcType = document.getElementById('funcSelect').value;
-
-        if (a >= b) return showStatus("Конец (b) должен быть больше начала (a)", "error");
-
-        const step = (b - a) / (n - 1);
-        let text = '';
-        
-        for(let i=0; i<n; i++) {
-            let x = a + i * step;
-            let y = 0;
-            if (funcType === "1") y = Math.cos(x);
-            else if (funcType === "2") y = Math.pow(x, 3) - 4*Math.pow(x, 2) + 6*x - 2.1;
-            else if (funcType === "3") y = 0.5 * Math.exp(x);
-            
-            text += `${x.toFixed(4)} ${y.toFixed(4)}\n`;
-        }
-        
-        state.funcType = parseInt(funcType);
-        inputArea.value = text.trim();
-        showStatus("Данные сгенерированы! Нажмите 'Рассчитать'", "success");
-    });
-}
-
-function renderDiffTable(points, diffTable, isEquidistant) {
-    const head = document.getElementById('diffTableHead');
-    const body = document.getElementById('diffTableBody');
-    const panel = document.getElementById('diffTablePanel');
-    if(!head || !body || !panel) return;
-
-    let headHtml = `<th> X </th><th> Y </th>`;
-
-    const symbol = isEquidistant ? 'Δ' : 'f';
-
-    for(let i = 1; i < points.length; i++) {
-
-        headHtml += `<th> ${symbol}^${i} </th>`;
-    }
-    head.innerHTML = headHtml;
-
-    let bodyHtml = '';
-    for(let i = 0; i < points.length; i++) {
-        bodyHtml += `<tr><td>${points[i].x.toFixed(3)}</td>`;
-        for(let j = 0; j < points.length; j++) {
-            if(i + j < points.length) {
-                bodyHtml += `<td>${diffTable[i][j].toFixed(4)}</td>`;
-            } else {
-                bodyHtml += `<td></td>`;
-            }
-        }
-        bodyHtml += `</tr>`;
-    }
-    body.innerHTML = bodyHtml;
-    panel.style.display = 'block';
+  video.addEventListener('mouseenter', () => { video.playbackRate = 8.0; });
+  video.addEventListener('mouseleave', () => { video.playbackRate = 4.0; });
 }

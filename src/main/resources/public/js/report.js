@@ -1,4 +1,9 @@
-const EQ_LABELS = { 1: "y' = x + y", 2: "y' = y - x", 3: "y' = -2xy" };
+const EQ_LABELS = { 
+    1: "y' = 3y", 
+    2: "y' = y + 2x", 
+    3: "y' = 4xy", 
+    4: "y' = y / (x + 1)" 
+};
 
 export function downloadReport(state) {
   const d = state.data;
@@ -6,13 +11,13 @@ export function downloadReport(state) {
 
   let report = `[ЧИСЛЕННОЕ РЕШЕНИЕ ОДУ - ОТЧЁТ]
 
-Уравнение:     ${EQ_LABELS[state.equation]}
-Нач. условие:  y(${state.x0}) = ${state.y0}
-Интервал:      [${state.x0}, ${state.xn}]
-Шаг h:         ${state.h}
-Точность eps:  ${state.eps}
+  Уравнение:     ${EQ_LABELS[state.equation]}
+  Нач. условие:  y(${state.x0}) = ${state.y0}
+  Интервал:      [${state.x0}, ${state.xn}]
+  Шаг h:         ${state.h}
+  Точность eps:  ${state.eps}
 
-[ОЦЕНКА ПОГРЕШНОСТИ]
+  [ОЦЕНКА ПОГРЕШНОСТИ]
 `;
 
   d.methods.forEach(m => {

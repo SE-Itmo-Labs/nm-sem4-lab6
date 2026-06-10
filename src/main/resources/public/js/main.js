@@ -24,11 +24,16 @@ function validateInputs(v) {
   for (const [name, val] of Object.entries(fields)) {
     if (!Number.isFinite(val)) return `Поле «${name}» должно быть числом`;
   }
-  if (v.x0 === v.xn) return 'Интервал нулевой длины: x0 не должен совпадать с xn';
-  if (v.xn < v.x0) return 'Правая граница xn должна быть больше левой x0';
-  if (v.h <= 0) return 'Шаг h должен быть больше 0';
+
+  if (v.x0 < -100000 || v.x0 > 100000) return 'x0 должно быть от -100000 до 100000';
+  if (v.y0 < -100000 || v.y0 > 100000) return 'y0 должно быть от -100000 до 100000';
+  if (v.xn < -100100 || v.xn > 100100) return 'xn должно быть от -100100 до 100100';
+
+  if (v.h < 0.01) return 'Шаг h должен быть минимум 0.01';
   if (v.h > (v.xn - v.x0)) return 'Шаг h больше длины интервала';
-  if (v.eps <= 0) return 'Точность ε должна быть больше 0';
+  
+  if (v.eps < 0.000001) return 'Точность ε должна быть минимум 0.000001';
+
   return null;
 }
 

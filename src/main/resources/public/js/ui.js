@@ -23,7 +23,7 @@ export function displayAccuracy(methods) {
       html += `
         <div class="result-item" style="margin-bottom: 8px; border-color:#aa0000;">
             <span class="result-label" style="font-size: 13px;">${m.name}</span>
-            <span class="result-value" style="color:#aa0000; font-size:13px;">⚠ ${m.error}</span>
+            <span class="result-value" style="color:#aa0000; font-size:13px;">${m.error}</span>
         </div>`;
     } else {
       html += `

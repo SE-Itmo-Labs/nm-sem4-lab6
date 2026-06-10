@@ -1,0 +1,108 @@
+<mxfile host="65bd71144e">
+    <diagram id="2I6pfc0xi91YGLwQ2-LN" name="Page-1">
+        <mxGraphModel dx="207" dy="623" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="5" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="2" target="4">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="Начало" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="150" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Конец" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="890" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="f, x&lt;sub&gt;0&lt;/sub&gt;, y&lt;sub&gt;0&lt;/sub&gt;, x&lt;sub&gt;n&lt;/sub&gt;, h" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="200" y="210" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="6" target="8">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="result[]" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="270" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="8" target="10">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="n = steps(x&lt;sub&gt;0&lt;/sub&gt;, x&lt;sub&gt;n&lt;/sub&gt;, h)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="320" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="10" target="12">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="x = x&lt;sub&gt;0&lt;/sub&gt;&lt;div&gt;y = y&lt;sub&gt;0&lt;/sub&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="370" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="12" target="14">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="result&lt;sub&gt;0 &lt;/sub&gt;= {x, y}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="430" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="14" target="30">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="14" target="27">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="380" y="510"/>
+                            <mxPoint x="380" y="810"/>
+                            <mxPoint x="260" y="810"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="14" value="i от 0 до n - 1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="490" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="16" target="21">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="y = y + h / 2 * (f(x, y) + f(x&lt;sub&gt;next&lt;/sub&gt;, y&lt;sub&gt;predict&lt;/sub&gt;))" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="660" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="21" target="23">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="x = x&lt;sub&gt;next&lt;/sub&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="710" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="23" target="14">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="140" y="770"/>
+                            <mxPoint x="140" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="23" value="result&lt;sub&gt;i+1 &lt;/sub&gt;= {x, y}" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="760" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="27" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="result" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="200" y="830" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="Модиф. метод Эйлера" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="205" y="110" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="30" target="32">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="x&lt;sub&gt;next&lt;/sub&gt; = x&lt;sub&gt;0&lt;/sub&gt; + (i + 1) * h" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="550" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="32" target="16">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="y&lt;sub&gt;predict&lt;/sub&gt; = y&amp;nbsp;+ h * f(x, y)" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="190" y="600" width="140" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

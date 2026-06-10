@@ -117,7 +117,7 @@ public class OdeService {
         return result;
     }
 
-    public double rungeError(List<Point2D> one, List<Point2D> half, int p) {
+    public double rungeError(List<Point2D> one, List<Point2D> half, int p, int n1, int n2) {
         double denom = Math.pow(2, p) - 1;
         double max = 0.0;
         for (int i = 0; i < one.size(); i++) {

@@ -98,14 +98,17 @@ public class OdeApi {
 
             List<Point2D> euler = service.euler(f, x0, y0, xn, h);
             List<Point2D> eulerHalf = service.euler(f, x0, y0, xn, h / 2);
-            double eulerRunge = service.rungeError(euler, eulerHalf, 1);
+
+
+            
+            double eulerRunge = service.rungeError(euler, eulerHalf, 1, euler.size(), eulerHalf.size());
             methods.add(methodOk("Метод Эйлера", euler, eulerRunge,
                     "Погрешность (правило Рунге)"));
 
 
             List<Point2D> impr = service.improvedEuler(f, x0, y0, xn, h);
             List<Point2D> imprHalf = service.improvedEuler(f, x0, y0, xn, h / 2);
-            double imprRunge = service.rungeError(impr, imprHalf, 2);
+            double imprRunge = service.rungeError(impr, imprHalf, 2, impr.size(), imprHalf.size());
             methods.add(methodOk("Усовершенствованный метод Эйлера", impr, imprRunge,
                     "Погрешность (правило Рунге)"));
 

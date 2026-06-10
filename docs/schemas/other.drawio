@@ -1,14 +1,74 @@
 <mxfile host="65bd71144e">
     <diagram id="2I6pfc0xi91YGLwQ2-LN" name="Page-1">
-        <mxGraphModel dx="750" dy="2258" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="250" dy="753" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="2" value="Начало" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="200" y="180" width="120" height="30" as="geometry"/>
+                <mxCell id="113" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="2" target="112">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="29" value="Метод Милна" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="205" y="150" width="110" height="30" as="geometry"/>
+                <mxCell id="2" value="Начало" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="190" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="Один шаг метода Рунге-Кутта 4го порядка" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="150" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="111" value="Конец" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="500" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="117" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="112" target="114">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="112" value="f, x, y, h" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="200" y="240" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="116" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="114" target="115">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="114" value="&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;k&lt;sub style=&quot;&quot;&gt;1&lt;/sub&gt; = f(x, y)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;k&lt;sub&gt;2&lt;/sub&gt; = f(x + h / 2, y + h / 2 * k&lt;sub&gt;1&lt;/sub&gt;)&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;k&lt;/span&gt;&lt;sub style=&quot;background-color: transparent;&quot;&gt;3&lt;/sub&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt; = f(x + h / 2, y + h / 2 * k&lt;sub&gt;2&lt;/sub&gt;)&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;k&lt;/span&gt;&lt;sub style=&quot;background-color: transparent;&quot;&gt;4&lt;/sub&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt; = f(x + h, y + h * k&lt;sub&gt;3&lt;/sub&gt;)&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="171.25" y="290" width="177.5" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="120" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="115" target="118">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="115" value="result = y + h / 6 * (k&lt;sub&gt;1&lt;/sub&gt; + 2 * k&lt;sub&gt;2&lt;/sub&gt; + 2 * k&lt;sub&gt;3 &lt;/sub&gt;+ k&lt;sub&gt;4&lt;/sub&gt;)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="130.63" y="390" width="258.75" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="119" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="118" target="111">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="118" value="result" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="200" y="450" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="121" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="122" target="126">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="122" value="Начало" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="190" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="123" value="Число шагов" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="150" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="124" value="Конец" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="390" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="125" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="126" target="128">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="126" value="x&lt;sub&gt;0&lt;/sub&gt;, x&lt;sub&gt;n&lt;/sub&gt;, h" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="420" y="240" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="135" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="128" target="132">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="128" value="&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;result = [x&lt;sub&gt;n&lt;/sub&gt; - x&lt;sub&gt;0&lt;/sub&gt;] / h&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="409.37" y="290" width="141.26" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="131" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="132" target="124">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="132" value="result" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="420" y="340" width="120" height="30" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

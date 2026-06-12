@@ -99,7 +99,6 @@ public class OdeApi {
             List<Point2D> euler = service.euler(f, x0, y0, xn, h);
             List<Point2D> eulerHalf = service.euler(f, x0, y0, xn, h / 2);
 
-
             
             double eulerRunge = service.rungeError(euler, eulerHalf, 1, euler.size(), eulerHalf.size());
             methods.add(methodOk("Метод Эйлера", euler, eulerRunge,
@@ -113,10 +112,31 @@ public class OdeApi {
                     "Погрешность (правило Рунге)"));
 
 
+            // if (n < 4) {
+            //     methods.add(methodError("Метод Милна",
+            //             "Для метода Милна нужно минимум 5 узлов (n >= 4). "
+            //             + "Уменьшите шаг h или увеличьте интервал."));
+            // } else {
+            //     List<Point2D> milne = service.milne(f, x0, y0, xn, h, eps);
+            //     double milneErr = service.exactError(milne, eq, x0, y0);
+            //     methods.add(methodOk("Метод Милна", milne, milneErr,
+            //             "Погрешность (точное решение)"));
+            // }
+
             if (n < 4) {
-                methods.add(methodError("Метод Милна",
-                        "Для метода Милна нужно минимум 5 узлов (n >= 4). "
-                        + "Уменьшите шаг h или увеличьте интервал."));
+                Double test1 = service.rungeKutta4Step(f, x0, y0, h);
+                Double test2 = service.rungeKutta4Step(f, x0 + h, test1, h);
+                Double test3 = service.rungeKutta4Step(f, x0 + 2*h, test2, h);
+
+                List<Point2D> points = new ArrayList<Point2D>();
+
+                points.add(new Point2D(x0, test1));
+                points.add(new Point2D(x0 + h, test2));
+                points.add(new Point2D(x0 + 2*h, test3));
+                
+                methods.add(methodOk("Метод Милна", points, 0,
+                        "Погрешность (точное решение)"));
+
             } else {
                 List<Point2D> milne = service.milne(f, x0, y0, xn, h, eps);
                 double milneErr = service.exactError(milne, eq, x0, y0);
